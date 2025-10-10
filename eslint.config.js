@@ -6,5 +6,11 @@ export default antfu({
   stylistic: {
     semi: true,
     quotes: 'single',
+
+  },
+  rules: {
+    'no-console': 'off',
+    'no-unused-vars': 'warn',
+    'unused-imports/no-unused-imports': 'warn',
   },
 });

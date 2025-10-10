@@ -1,6 +1,5 @@
 import type { LocationQueryRaw, RouteParamsRawGeneric, RouteRecordRaw } from 'vue-router';
 import type { RouteName } from './static';
-import { omit } from 'lodash-es';
 import { createRouter, createWebHistory } from 'vue-router';
 import { withPermission } from './permission';
 import { routes } from './routes';

@@ -71,5 +71,8 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+  "[snippets]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }

@@ -1,9 +1,29 @@
 <script setup lang="ts">
+import { VIcon } from '@/components/ui';
+import { routerPush } from '@/router';
+
+function handleBack() {
+  routerPush({ name: 'home' });
+}
 </script>
 
 <template>
-  <div class="home">
-    <h1>403</h1>
+  <div class="w-screen h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="flex items-center justify-center">
+        <VIcon icon="local:403" class="text-[350px]" />
+      </div>
+
+      <div class="mb-8 text-red-400">
+        Sorry, you are not authorized to access this page.
+      </div>
+
+      <div class="not-found-text">
+        <el-button type="primary" @click="handleBack">
+          Back Home
+        </el-button>
+      </div>
+    </div>
   </div>
 </template>
 

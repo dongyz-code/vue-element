@@ -14,7 +14,10 @@ function handleBack() {
         <VIcon icon="local:403" class="text-[350px]" />
       </div>
 
-      <div class="mb-8 text-red-400">
+      <div class="text-2xl -mt-10 mb-4 text-gray-800">
+        403
+      </div>
+      <div class="mb-4 text-gray-500">
         Sorry, you are not authorized to access this page.
       </div>
 

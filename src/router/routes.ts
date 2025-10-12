@@ -23,6 +23,16 @@ export const routes: RouteItem[] = [
         component: () => import('@/pages/404/index.vue'),
       },
       {
+        path: 'demo/pro-table',
+        name: 'demo-pro-table',
+        component: () => import('@/pages/demo/pro-table/index.vue'),
+      },
+      {
+        path: 'demo/pro-table/simple',
+        name: 'demo-pro-table-simple',
+        component: () => import('@/pages/demo/pro-table/simple.vue'),
+      },
+      {
         path: '/:catchAll(.*)',
         redirect: '/404',
       },

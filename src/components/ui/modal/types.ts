@@ -3,7 +3,7 @@ import type { ButtonType } from 'element-plus';
 /**
  * Dialog 组件的 Props 接口
  */
-export interface DialogProps {
+export type DialogProps = {
   /** 对话框标题 */
   title?: string;
   /** 对话框宽度 */
@@ -50,12 +50,12 @@ export interface DialogProps {
   loading?: boolean;
   /** 确认按钮加载状态 */
   confirmLoading?: boolean;
-}
+};
 
 /**
  * Dialog 组件的事件类型
  */
-export interface DialogEmits {
+export type DialogEmits = {
   /** 更新 v-model 值 */
   'update:modelValue': (value: boolean) => void;
   /** 打开时触发 */
@@ -72,28 +72,28 @@ export interface DialogEmits {
   'cancel': () => void;
   /** 关闭前的回调 */
   'before-close': (done: () => void) => void;
-}
+};
 
 /**
  * Dialog 组件的实例方法
  */
-export interface DialogInstance {
+export type DialogInstance = {
   /** 打开对话框 */
   open: () => void;
   /** 关闭对话框 */
   close: () => void;
   /** 是否可见 */
   visible: boolean;
-}
+};
 
 /**
  * Dialog 组件的插槽类型
  */
-export interface DialogSlots {
+export type DialogSlots = {
   /** 默认插槽 - 内容区域 */
   default?: () => any;
   /** 头部插槽 */
   header?: () => any;
   /** 底部插槽 */
   footer?: () => any;
-}
+};

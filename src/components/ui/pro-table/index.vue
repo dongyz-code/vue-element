@@ -29,6 +29,7 @@ const {
   tableRef,
   visibleColumns,
   tableData,
+  getRowKey,
   getValue,
   setPageData,
   handleFilterChange,
@@ -36,6 +37,17 @@ const {
   handleRowDblclick,
   handlePageChange,
   refresh,
+
+  /** 选择相关 */
+  headerChecked,
+  selectionKeys,
+  halfCheckedSet,
+  toggleRowSelection,
+  clearSelection,
+  setSelection,
+  isChecked,
+  isHalfChecked,
+  toggleAllSelection,
 
   PageComponent,
 } = useProTable({ props, emit });
@@ -72,6 +84,30 @@ defineExpose<ProTableExpose<T>>({
       @filter-change="handleFilterChange"
     >
       <slot></slot>
+
+      <!-- 选择列 -->
+      <el-table-column
+        v-if="selection"
+        :width="55"
+        :fixed="selection.fixed"
+      >
+        <template #header>
+          <el-checkbox
+            :model-value="headerChecked.checked"
+            :indeterminate="headerChecked.halfChecked"
+            @change="toggleAllSelection($event)"
+          >
+          </el-checkbox>
+        </template>
+        <template #default="{ row }">
+          <el-checkbox
+            :model-value="isChecked(getRowKey(row))"
+            :indeterminate="isHalfChecked(getRowKey(row))"
+            @change="toggleRowSelection(getRowKey(row), $event)"
+          >
+          </el-checkbox>
+        </template>
+      </el-table-column>
 
       <!-- 数据列 -->
       <el-table-column

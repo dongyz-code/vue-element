@@ -1,9 +1,11 @@
 import type { ElTable } from 'element-plus';
 import type { EmitFn } from 'vue';
 import type { DefaultRow, ProTableColumn, ProTableEmits, ProTableProps } from '../types';
+
 import { get } from 'lodash-es';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, toRef, useAttrs, watch } from 'vue';
 import { usePage } from '../../pagination';
+import { useTreeSelection } from './useTableSelection';
 
 export type UseProTableOptions<T extends DefaultRow = DefaultRow> = {
   props: ProTableProps<T>;
@@ -17,8 +19,33 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
   props,
   emit,
 }: UseProTableOptions<T>) {
+  const attrs = useAttrs();
   // 响应式数据
   const tableRef = ref<InstanceType<typeof ElTable>>();
+
+  const hasExternalSelection = computed(() => !!attrs.selection);
+  const externalSelectionKeys = defineModel<string[]>('selection', { default: () => [] });
+
+  const {
+    headerChecked,
+    selectionKeys,
+    halfCheckedSet,
+    toggleRowSelection,
+    clearSelection,
+    setSelection,
+    isChecked,
+    isHalfChecked,
+    toggleAllSelection,
+  } = useTreeSelection({
+    data: toRef(props, 'data'),
+    option: {
+      type: props.selection?.type ?? 'checkbox',
+      checkStrictly: props.selection?.checkStrictly ?? false,
+      rowKey: getRowKey,
+      selectionKeys: hasExternalSelection ? externalSelectionKeys : undefined,
+      defaultSelectionKeys: props.selection?.defaultSelectionKeys ?? [],
+    },
+  });
 
   const { pageData, PageComponent } = usePage();
   const sortInfo = ref<{ prop: string; order: 'asc' | 'desc' | null }>({
@@ -141,6 +168,17 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
     handleRowDblclick,
     handlePageChange,
     refresh,
+
+    /** 选择相关 */
+    headerChecked,
+    selectionKeys,
+    halfCheckedSet,
+    toggleRowSelection,
+    clearSelection,
+    setSelection,
+    isChecked,
+    isHalfChecked,
+    toggleAllSelection,
 
     // 组件
     PageComponent,

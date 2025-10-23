@@ -64,7 +64,13 @@ export type ProTableProps<T extends DefaultRow = DefaultRow> = {
   columns: ProTableColumn<T>[];
   /** 是否显示选择列 */
   selection?: {
-    type: 'checkbox' | 'radio';
+    /** 默认选择项 */
+    defaultSelectionKeys?: string[];
+    /** 选择模式 */
+    type?: 'checkbox' | 'radio';
+    /** 是否严格模式 */
+    checkStrictly?: boolean;
+    /** 是否固定选择列 */
     fixed?: boolean;
     /** 是否可被选择 */
     selectable?: (row: T, index: number) => boolean;

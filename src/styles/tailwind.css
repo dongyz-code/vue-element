@@ -8,3 +8,20 @@
   --color-error: var(--el-color-error);
   --color-info: var(--el-color-info);
 }
+
+@utility scroll-bar {
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    border-radius: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+}

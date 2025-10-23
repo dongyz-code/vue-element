@@ -1,12 +1,9 @@
-<script setup lang="ts" generic="T extends Record<string, any> = any">
-import type { ProTableEmits, ProTableExpose, ProTableProps } from './types';
+<script setup lang="ts" generic="T extends DefaultRow = DefaultRow">
+import type { ElTable } from 'element-plus';
+import type { DefaultRow, ProTableEmits, ProTableExpose, ProTableProps } from './types';
 import { useProTable } from './hooks/useProTable';
 
 const props = withDefaults(defineProps<ProTableProps>(), {
-  selection: false,
-  selectionMode: 'multiple',
-  selectedRows: () => [],
-  pagination: true,
   pageConfig: () => ({
     currentPage: 1,
     pageSize: 10,
@@ -14,65 +11,39 @@ const props = withDefaults(defineProps<ProTableProps>(), {
     pageSizes: [10, 20, 50, 100],
     layout: 'total, sizes, prev, pager, next, jumper',
   }),
-  sortable: true,
-  filterable: true,
+  sortable: false,
+  filterable: false,
   loading: false,
-  border: true,
+  border: false,
   stripe: false,
   showHeader: true,
   emptyText: '暂无数据',
 });
 
 // Emits 定义
-const emit = defineEmits<ProTableEmits<T>>();
+const emit = defineEmits<ProTableEmits>();
 
-// 使用 composables
+const selectionKeys = defineModel<string[]>('selection', { default: () => [] });
+
 const {
   tableRef,
-  selectedRowKeys,
-  selectedRows,
-  currentPage,
-  currentPageSize,
-  sortInfo,
-  filterInfo,
   visibleColumns,
   tableData,
-  total,
-  pageSizes,
-  paginationLayout,
-  getRowKey,
   getValue,
-  getIndex,
-  getSelectable,
-  getFilterMethod,
-  handleSelectionChange,
-  clearSelection,
-  toggleRowSelection,
-  toggleAllSelection,
-  setRowSelectionByKey,
-  setRowSelectionsByKeys,
-  handleSizeChange,
-  handleCurrentChange,
-  handleSortChange,
+  setPageData,
   handleFilterChange,
   handleRowClick,
   handleRowDblclick,
+  handlePageChange,
   refresh,
-  getSelectedRows,
-  getSelectedRowKeys,
+
+  PageComponent,
 } = useProTable({ props, emit });
 
 // 暴露方法
 defineExpose<ProTableExpose<T>>({
-  getSelectedRows,
-  clearSelection,
-  toggleRowSelection,
-  toggleAllSelection,
   refresh,
-  // 新增方法
-  getSelectedRowKeys,
-  setRowSelectionByKey,
-  setRowSelectionsByKeys,
+  setPageData,
 });
 </script>
 
@@ -81,6 +52,10 @@ defineExpose<ProTableExpose<T>>({
     <!-- 表格主体 -->
     <el-table
       ref="tableRef"
+      :size="size"
+      :fit="fit"
+      :default-expand-all="defaultExpandAll"
+      :expand-row-keys="expandRowKeys"
       :row-key="rowKey"
       :data="tableData"
       :height="height"
@@ -96,62 +71,51 @@ defineExpose<ProTableExpose<T>>({
       @sort-change="handleSortChange"
       @filter-change="handleFilterChange"
     >
-      <!-- 选择列 -->
-      <el-table-column
-        v-if="selection"
-        width="55"
-        :selectable="getSelectable"
-        :reserve-selection="selectionMode === 'crossPage'"
-      />
+      <slot></slot>
 
       <!-- 数据列 -->
       <el-table-column
         v-for="column in visibleColumns"
         :key="column.prop"
+        :type="column.type"
+        :selectable="column.selectable"
+        :header-align="column.headerAlign"
+        :label-class-name="column.labelClassName"
+        :class-name="column.className"
+        :resizable="column.resizable"
+        :formatter="column.formatter"
         :prop="column.prop"
         :label="column.label"
         :width="column.width"
         :min-width="column.minWidth"
         :fixed="column.fixed"
         :align="column.align"
-        :sortable="column.sortable && sortable ? 'custom' : false"
-        :filters="column.filterable && filterable ? column.filterOptions?.map(item => ({ text: item.label, value: item.value })) : undefined"
-        :filter-method="column.filterable && filterable ? getFilterMethod(column) : undefined"
+        :show-overflow-tooltip="column.showOverflowTooltip"
+        :sortable="column.sortable"
+        :sort-method="column.sortMethod"
+        :filters="column.filters"
+        :filter-multiple="column.filterMultiple"
+        :filter-method="column.filterMethod"
       >
-        <template #default="{ row, $index }">
+        <template v-if="column.slot && $slots[column.slot]" #default="{ row, $index }">
           <!-- 插槽自定义渲染 -->
           <slot
-            v-if="column.slot"
             :name="column.slot"
             :row="row"
             :column="column"
             :index="$index"
-            :value="getValue(row, column.prop)"
+            :value="getValue(row, column.prop!)"
           />
-          <!-- 自定义渲染函数 -->
-          <template v-else-if="column.render">
-            <component :is="column.render(row, column, $index)" />
-          </template>
-          <!-- 默认渲染 -->
-          <template v-else>
-            {{ getValue(row, column.prop) }}
-          </template>
+        </template>
+
+        <template v-if="column.headerSlot && $slots[column.headerSlot]" #header>
+          <slot :name="column.headerSlot" />
         </template>
       </el-table-column>
     </el-table>
 
     <!-- 分页 -->
-    <el-pagination
-      v-if="pagination"
-      v-model:current-page="currentPage"
-      v-model:page-size="currentPageSize"
-      :page-sizes="pageSizes"
-      :total="total"
-      :layout="paginationLayout"
-      class="pro-table-pagination"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+    <PageComponent @update="handlePageChange" />
   </div>
 </template>
 

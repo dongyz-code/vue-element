@@ -1,10 +1,19 @@
+import type { TableColumnCtx } from 'element-plus';
+import type { VNode } from 'vue';
 import type { PageData } from '../pagination/types';
 
-export type ProTableColumn<T = any> = {
+export type DefaultRow = {
+  [key: number]: any;
+  [key: symbol]: any;
+  [key: string]: any;
+};
+
+export type ProTableColumn<T extends DefaultRow = DefaultRow> = {
+  type?: 'default' | 'index' | 'expand';
   /** 列的唯一标识 */
-  prop: string;
+  prop?: string;
   /** 列标题 */
-  label: string;
+  label?: string;
   /** 列宽度 */
   width?: string | number;
   /** 列最小宽度 */
@@ -13,49 +22,64 @@ export type ProTableColumn<T = any> = {
   fixed?: boolean | 'left' | 'right';
   /** 是否可排序 */
   sortable?: boolean;
-  /** 是否可筛选 */
-  filterable?: boolean;
+  /** 自定义排序方法 */
+  sortMethod?: (a: T, b: T) => number;
   /** 筛选选项 */
-  filterOptions?: Array<{ label: string; value: any }>;
+  filters?: Array<{ text: string; value: any }>;
+  /** 是否多选 */
+  filterMultiple?: boolean;
+  /** 自定义筛选方法 */
+  filterMethod?: (value: any, row: T, column: TableColumnCtx<T>) => void;
   /** 列对齐方式 */
   align?: 'left' | 'center' | 'right';
-  /** 是否显示 */
-  show?: boolean;
-  /** 自定义渲染函数 */
-  render?: (row: T, column: ProTableColumn<T>, index: number) => any;
+  /** 表头对齐方式 */
+  headerAlign?: 'left' | 'center' | 'right';
+  /** 当前列标题的自定义类名 */
+  labelClassName?: string;
+  /** 列的 className */
+  className?: string;
+  /** 是否可调整列宽 */
+  resizable?: boolean;
+  /** 自定义格式化函数 */
+  formatter?: (row: T, column: TableColumnCtx<T>, cellValue: any, index: number) => VNode | string;
   /** 插槽名称 */
   slot?: string;
+  /** 表头插槽名称 */
+  headerSlot?: string;
+  /** 提示 */
+  tooltip?: string;
   /** 子列配置 */
   children?: ProTableColumn<T>[];
   /** 是否隐藏 */
   hidden?: boolean;
+  /** 是否显示溢出提示 */
+  showOverflowTooltip?: boolean;
+
 };
 
-export type ProTableProps<T = any> = {
+export type ProTableProps<T extends DefaultRow = DefaultRow> = {
   /** 表格数据 */
   data: T[];
   /** 列配置 */
   columns: ProTableColumn<T>[];
   /** 是否显示选择列 */
   selection?: {
-    type: 'single' | 'multiple';
+    type: 'checkbox' | 'radio';
     fixed?: boolean;
+    /** 是否可被选择 */
+    selectable?: (row: T, index: number) => boolean;
   };
-  /** 选择模式：single-单选，multiple-多选，crossPage-跨页多选 */
-  selectionMode?: 'single' | 'multiple' | 'crossPage';
-  /** 已选择的行数据 */
-  selectedRows?: T[];
+  /** 表格尺寸 */
+  size?: 'large' | 'default' | 'small';
+  /** 列的宽度是否自撑开 */
+  fit?: boolean;
   /** 行唯一标识字段 */
-  rowKey?: string;
+  rowKey?: string | ((row: T) => string);
   /** 是否显示分页 */
   pagination?: PageData;
-  /** 是否显示排序 */
-  sortable?: boolean;
-  /** 是否显示筛选 */
-  filterable?: boolean;
   /** 加载状态 */
   loading?: boolean;
-  /** 表格高度 */
+  /** 表格高度 设置高度可实现固定表头 */
   height?: string | number;
   /** 最大高度 */
   maxHeight?: string | number;
@@ -67,11 +91,15 @@ export type ProTableProps<T = any> = {
   showHeader?: boolean;
   /** 空数据文本 */
   emptyText?: string;
+  /** 是否默认展开所有行 */
+  defaultExpandAll?: boolean;
+  /** 展开的行 keys */
+  expandRowKeys?: (string)[];
 };
 
-export type ProTableEmits<T = any> = {
+export type ProTableEmits<T extends DefaultRow = DefaultRow> = {
   /** 选择变化事件 */
-  selectionChange: [selectedRows: T[]];
+  onSelect: [selectedRows: T[]];
   /** 分页变化事件 */
   pageChange: [page: number, pageSize: number];
   /** 排序变化事件 */
@@ -84,7 +112,7 @@ export type ProTableEmits<T = any> = {
   rowDblclick: [row: T, column: ProTableColumn<T>, event: Event];
 };
 
-export type ProTableExpose<T = any> = {
+export type ProTableExpose<T extends DefaultRow = DefaultRow> = {
   /** 获取已选择的行 */
   getSelectedRows: () => T[];
   /** 获取已选择的行 keys */

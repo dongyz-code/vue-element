@@ -51,7 +51,6 @@ const columns: ProTableColumn<UserData>[] = [
     label: '姓名',
     width: 120,
     sortable: true,
-    filterable: true,
     filterOptions: [
       { label: '张三', value: '张三' },
       { label: '李四', value: '李四' },
@@ -69,7 +68,6 @@ const columns: ProTableColumn<UserData>[] = [
     label: '年龄',
     width: 80,
     sortable: true,
-    filterable: true,
     filterOptions: [
       { label: '20-30', value: '20-30' },
       { label: '30-40', value: '30-40' },
@@ -81,7 +79,6 @@ const columns: ProTableColumn<UserData>[] = [
     label: '状态',
     width: 100,
     slot: 'status',
-    filterable: true,
     filterOptions: [
       { label: '启用', value: 1 },
       { label: '禁用', value: 0 },
@@ -90,8 +87,7 @@ const columns: ProTableColumn<UserData>[] = [
   {
     prop: 'department',
     label: '部门',
-    width: 120,
-    filterable: true,
+    minWidth: 120,
     filterOptions: [
       { label: '技术部', value: '技术部' },
       { label: '产品部', value: '产品部' },
@@ -274,7 +270,9 @@ onMounted(() => {
           :data="tableData"
           :columns="columns"
           :loading="loading"
-          :pagination="true"
+          :pagination="{
+            size: 10,
+          }"
           :page-config="pageConfig"
           @page-change="handlePageChange"
           @sort-change="handleSortChange"
@@ -290,10 +288,7 @@ onMounted(() => {
           :data="tableData"
           :columns="columns"
           :loading="loading"
-          :selection="true"
-          selection-mode="multiple"
           :selected-rows="selectedRows"
-          :pagination="true"
           :page-config="pageConfig"
           @selection-change="handleSelectionChange"
           @page-change="handlePageChange"
@@ -324,10 +319,7 @@ onMounted(() => {
           :data="tableData"
           :columns="columns"
           :loading="loading"
-          :selection="true"
-          selection-mode="crossPage"
           :selected-rows="crossPageSelectedRows"
-          :pagination="true"
           :page-config="pageConfig"
           @selection-change="handleCrossPageSelectionChange"
           @page-change="handlePageChange"
@@ -348,10 +340,7 @@ onMounted(() => {
           :data="tableData"
           :columns="columns"
           :loading="loading"
-          :selection="true"
-          selection-mode="single"
           :selected-rows="singleSelectedRows"
-          :pagination="true"
           :page-config="pageConfig"
           @selection-change="handleSingleSelectionChange"
           @page-change="handlePageChange"
@@ -365,7 +354,6 @@ onMounted(() => {
           :data="tableData"
           :columns="columns"
           :loading="loading"
-          :pagination="false"
           :stripe="true"
           :border="true"
         />

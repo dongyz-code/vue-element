@@ -82,7 +82,7 @@ export type ProTableProps<T extends DefaultRow = DefaultRow> = {
   /** 行唯一标识字段 */
   rowKey?: string | ((row: T) => string);
   /** 是否显示分页 */
-  pagination?: PageData;
+  pagination?: Partial<PageData>;
   /** 加载状态 */
   loading?: boolean;
   /** 表格高度 设置高度可实现固定表头 */
@@ -119,8 +119,6 @@ export type ProTableEmits<T extends DefaultRow = DefaultRow> = {
 };
 
 export type ProTableExpose<T extends DefaultRow = DefaultRow> = {
-  /** 获取已选择的行 */
-  getSelectedRows: () => T[];
   /** 获取已选择的行 keys */
   getSelectedRowKeys: () => (string | number)[];
   /** 清空选择 */

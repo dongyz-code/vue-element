@@ -101,7 +101,6 @@ function handleSelectionChange(selection: UserData[]) {
     :data="tableData"
     :columns="columns"
     :selection="true"
-    selection-mode="multiple"
     :selected-rows="selectedRows"
     @selection-change="handleSelectionChange"
   />
@@ -116,7 +115,6 @@ function handleSelectionChange(selection: UserData[]) {
     :data="tableData"
     :columns="columns"
     :selection="true"
-    selection-mode="single"
     :selected-rows="selectedRows"
     @selection-change="handleSelectionChange"
   />
@@ -131,7 +129,6 @@ function handleSelectionChange(selection: UserData[]) {
     :data="tableData"
     :columns="columns"
     :selection="true"
-    selection-mode="crossPage"
     :selected-rows="selectedRows"
     @selection-change="handleSelectionChange"
   />
@@ -211,14 +208,14 @@ const columns: ProTableColumn<UserData>[] = [
 
 ### Events
 
-| 事件名          | 说明     | 参数                                                                   |
-| --------------- | -------- | ---------------------------------------------------------------------- |
-| selectionChange | 选择变化 | `(selectedRows: T[])`                                                  |
-| pageChange      | 分页变化 | `(page: number, pageSize: number)`                                     |
+| 事件名          | 说明     | 参数                                                       |
+| --------------- | -------- | ---------------------------------------------------------- |
+| selectionChange | 选择变化 | `(selectedRows: T[])`                                      |
+| pageChange      | 分页变化 | `(page: number, pageSize: number)`                         |
 | sortChange      | 排序变化 | `(sort: { prop: string; order: 'asc' \| 'desc' \| null })` |
-| filterChange    | 筛选变化 | `(filters: Record<string, any[]>)`                                     |
-| rowClick        | 行点击   | `(row: T, column: ProTableColumn<T>, event: Event)`                    |
-| rowDblclick     | 行双击   | `(row: T, column: ProTableColumn<T>, event: Event)`                    |
+| filterChange    | 筛选变化 | `(filters: Record<string, any[]>)`                         |
+| rowClick        | 行点击   | `(row: T, column: ProTableColumn<T>, event: Event)`        |
+| rowDblclick     | 行双击   | `(row: T, column: ProTableColumn<T>, event: Event)`        |
 
 ### Methods
 

@@ -1,5 +1,5 @@
 import type { ElTable } from 'element-plus';
-import type { EmitFn } from 'vue';
+import type { EmitFn, Ref } from 'vue';
 import type { DefaultRow, ProTableColumn, ProTableEmits, ProTableProps } from '../types';
 
 import { get } from 'lodash-es';
@@ -10,6 +10,7 @@ import { useTreeSelection } from './useTableSelection';
 export type UseProTableOptions<T extends DefaultRow = DefaultRow> = {
   props: ProTableProps<T>;
   emit: EmitFn<ProTableEmits<T>>;
+  selectionKeys: Ref<string[]>;
 };
 
 /**
@@ -18,13 +19,13 @@ export type UseProTableOptions<T extends DefaultRow = DefaultRow> = {
 export function useProTable<T extends DefaultRow = DefaultRow>({
   props,
   emit,
+  selectionKeys: externalSelectionKeys,
 }: UseProTableOptions<T>) {
   const attrs = useAttrs();
   // 响应式数据
   const tableRef = ref<InstanceType<typeof ElTable>>();
 
   const hasExternalSelection = computed(() => !!attrs.selection);
-  const externalSelectionKeys = defineModel<string[]>('selection', { default: () => [] });
 
   const {
     headerChecked,
@@ -56,7 +57,7 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
 
   /** 需要显示的列 */
   const visibleColumns = computed(() => {
-    return props.columns.filter(column => column.hidden === true);
+    return props.columns.filter(column => column.hidden !== true);
   });
 
   /** 表格数据 */

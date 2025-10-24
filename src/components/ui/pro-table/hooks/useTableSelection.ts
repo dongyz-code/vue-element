@@ -1,7 +1,7 @@
 import type { Ref } from 'vue';
 import type { DefaultRow } from '../types';
 
-import { computed, ref } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { arrObject } from '@/utils';
 
 export function useTreeSelection<T extends DefaultRow = DefaultRow>({
@@ -48,7 +48,7 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
       }
     },
   });
-  const selectionKeySet = computed(() => new Set(selectionKeys.value));
+  const selectionKeySet = computed(() => new Set(selectionKeys.value ?? []));
 
   /**
    * 树结构数据/树结构映射表
@@ -98,8 +98,9 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
       return;
     }
 
+    console.log(type, key, checked);
     if (checked) {
-      selectionKeys.value.push(key);
+      selectionKeys.value = [...selectionKeys.value, key];
     }
     else {
       selectionKeys.value = selectionKeys.value.filter(item => item !== key);
@@ -127,10 +128,14 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
   function updateChildrenSelection(node: TreeNode, checked: boolean) {
     const children = getChildren(node);
 
+    if (!children) {
+      return;
+    }
+
     children.forEach((child) => {
       const childKey = rowKey(child);
       if (checked) {
-        selectionKeys.value.push(childKey);
+        selectionKeys.value = [...selectionKeys.value, childKey];
       }
       else {
         selectionKeys.value = selectionKeys.value.filter(item => item !== childKey);
@@ -150,8 +155,8 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
       const parentChildren = getChildren(parent);
       const isAllChecked = parentChildren.every(child => selectionKeySet.value.has(rowKey(child)));
       if (isAllChecked) {
-        selectionKeys.value.push(parentKey);
-        selectionKeys.value = selectionKeys.value.filter(item => item !== parentKey);
+        selectionKeys.value = [...selectionKeys.value, parentKey];
+        halfCheckedSet.value.delete(parentKey);
       }
       else {
         halfCheckedSet.value.add(parentKey);
@@ -222,7 +227,7 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
 
     const isChecked = allKeys.every(key => selectionKeySet.value.has(key));
 
-    const isHalfChecked = allKeys.some(key => halfCheckedSet.value.has(key));
+    const isHalfChecked = allKeys.some(key => selectionKeySet.value.has(key));
 
     return {
       checked: isChecked,
@@ -230,6 +235,10 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
     };
   });
 
+  watchEffect(() => {
+    console.log('selectionKeys.value =', selectionKeys.value);
+    console.log('selectionKeySet.value =', selectionKeySet.value);
+  });
   /**
    * 选中全部
    */

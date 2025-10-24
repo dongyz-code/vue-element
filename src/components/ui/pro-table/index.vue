@@ -3,7 +3,7 @@ import type { ElTable } from 'element-plus';
 import type { DefaultRow, ProTableEmits, ProTableExpose, ProTableProps } from './types';
 import { useProTable } from './hooks/useProTable';
 
-const props = withDefaults(defineProps<ProTableProps>(), {
+const props = withDefaults(defineProps<ProTableProps<T>>(), {
   pageConfig: () => ({
     currentPage: 1,
     pageSize: 10,
@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<ProTableProps>(), {
     pageSizes: [10, 20, 50, 100],
     layout: 'total, sizes, prev, pager, next, jumper',
   }),
+  rowKey: 'id',
   sortable: false,
   filterable: false,
   loading: false,
@@ -18,10 +19,11 @@ const props = withDefaults(defineProps<ProTableProps>(), {
   stripe: false,
   showHeader: true,
   emptyText: '暂无数据',
+  fit: true,
 });
 
 // Emits 定义
-const emit = defineEmits<ProTableEmits>();
+const emit = defineEmits<ProTableEmits<T>>();
 
 const selectionKeys = defineModel<string[]>('selection', { default: () => [] });
 
@@ -40,7 +42,6 @@ const {
 
   /** 选择相关 */
   headerChecked,
-  selectionKeys,
   halfCheckedSet,
   toggleRowSelection,
   clearSelection,
@@ -50,12 +51,14 @@ const {
   toggleAllSelection,
 
   PageComponent,
-} = useProTable({ props, emit });
+} = useProTable({ props, emit, selectionKeys });
 
 // 暴露方法
 defineExpose<ProTableExpose<T>>({
   refresh,
   setPageData,
+  clearSelection,
+  setSelection,
 });
 </script>
 
@@ -77,10 +80,9 @@ defineExpose<ProTableExpose<T>>({
       :show-header="showHeader"
       :empty-text="emptyText"
       :loading="loading"
-      @selection-change="handleSelectionChange"
+      class="w-full"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblclick"
-      @sort-change="handleSortChange"
       @filter-change="handleFilterChange"
     >
       <slot></slot>
@@ -95,7 +97,7 @@ defineExpose<ProTableExpose<T>>({
           <el-checkbox
             :model-value="headerChecked.checked"
             :indeterminate="headerChecked.halfChecked"
-            @change="toggleAllSelection($event)"
+            @change="toggleAllSelection($event as boolean)"
           >
           </el-checkbox>
         </template>
@@ -103,7 +105,7 @@ defineExpose<ProTableExpose<T>>({
           <el-checkbox
             :model-value="isChecked(getRowKey(row))"
             :indeterminate="isHalfChecked(getRowKey(row))"
-            @change="toggleRowSelection(getRowKey(row), $event)"
+            @change="toggleRowSelection(getRowKey(row), $event as boolean)"
           >
           </el-checkbox>
         </template>
@@ -114,7 +116,6 @@ defineExpose<ProTableExpose<T>>({
         v-for="column in visibleColumns"
         :key="column.prop"
         :type="column.type"
-        :selectable="column.selectable"
         :header-align="column.headerAlign"
         :label-class-name="column.labelClassName"
         :class-name="column.className"

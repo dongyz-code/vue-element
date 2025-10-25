@@ -19,7 +19,7 @@ interface UserData {
 // 响应式数据
 const loading = ref(true);
 const tableData = ref<UserData[]>([]);
-const selectedRows = ref<UserData[]>(['1']);
+const selectedRows = ref<UserData[]>([]);
 const crossPageSelectedRows = ref<UserData[]>([]);
 const singleSelectedRows = ref<UserData[]>([]);
 

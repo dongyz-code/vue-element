@@ -68,6 +68,8 @@ const displayFields = computed(() => {
   return result;
 });
 
+const showCollapseButton = computed(() => needCollapse.value && props.showCollapse);
+
 function handleFieldChange(key: string, value: any) {
   emit('change', key, value, internalModel.value);
 }
@@ -113,7 +115,7 @@ function getColSpanStyle(colSpan?: number) {
   if (!colSpan || colSpan === 1)
     return {};
   return {
-    gridColumn: `span ${Math.min(colSpan, 4)}`,
+    gridColumn: `span ${Math.min(colSpan, 4)} / span ${Math.min(colSpan, 4)}`,
   };
 }
 
@@ -153,48 +155,46 @@ defineExpose<ProFormExpose>({
           :rules="getFieldRules(field)"
           :style="getColSpanStyle(field.colSpan)"
         >
-          <!-- 自定义插槽 -->
           <slot
             v-if="getSlotName(field)"
             :name="getSlotName(field)!"
-            :model="internalModel"
             :field="field"
+            :model="internalModel"
+            :value="internalModel[field.key]"
+            :set-value="(val: any) => { internalModel[field.key] = val }"
+            :form="formRef"
           />
 
-          <!-- Input -->
           <el-input
             v-else-if="field.type === 'input'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Textarea -->
           <el-input
             v-else-if="field.type === 'textarea'"
             v-model="internalModel[field.key]"
             type="textarea"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- InputNumber -->
           <el-input-number
             v-else-if="field.type === 'input-number'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Select -->
           <el-select
             v-else-if="field.type === 'select'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           >
             <el-option
@@ -206,134 +206,121 @@ defineExpose<ProFormExpose>({
             />
           </el-select>
 
-          <!-- Cascader -->
           <el-cascader
             v-else-if="field.type === 'cascader'"
             v-model="internalModel[field.key]"
             :options="field.choices"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- DatePicker -->
           <el-date-picker
             v-else-if="field.type === 'date'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- DatePicker Range -->
           <el-date-picker
             v-else-if="field.type === 'daterange'"
             v-model="internalModel[field.key]"
             type="daterange"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- TimePicker -->
           <el-time-picker
             v-else-if="field.type === 'time'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- TimeSelect -->
           <el-time-select
             v-else-if="field.type === 'timeselect'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Switch -->
           <el-switch
             v-else-if="field.type === 'switch'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Checkbox Group -->
           <el-checkbox-group
             v-else-if="field.type === 'checkbox'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           >
             <el-checkbox
               v-for="option in field.choices"
               :key="option.value"
-              :label="option.value"
+              :value="option.value"
               :disabled="option.disabled"
             >
               {{ option.label }}
             </el-checkbox>
           </el-checkbox-group>
 
-          <!-- Radio Group -->
           <el-radio-group
             v-else-if="field.type === 'radio'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           >
             <el-radio
               v-for="option in field.choices"
               :key="option.value"
-              :label="option.value"
+              :value="option.value"
               :disabled="option.disabled"
             >
               {{ option.label }}
             </el-radio>
           </el-radio-group>
 
-          <!-- Rate -->
           <el-rate
             v-else-if="field.type === 'rate'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- ColorPicker -->
           <el-color-picker
             v-else-if="field.type === 'color'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Slider -->
           <el-slider
             v-else-if="field.type === 'slider'"
             v-model="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Transfer -->
           <el-transfer
             v-else-if="field.type === 'transfer'"
             v-model="internalModel[field.key]"
             :data="field.choices"
-            :props="{ key: 'value', label: 'label', disabled: 'disabled', ...field.options?.props }"
-            v-bind="field.options"
+            :props="{ key: 'value', label: 'label', disabled: 'disabled' }"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
 
-          <!-- Upload -->
           <el-upload
             v-else-if="field.type === 'upload'"
             v-model:file-list="internalModel[field.key]"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           >
             <el-button type="primary">
@@ -341,26 +328,35 @@ defineExpose<ProFormExpose>({
             </el-button>
           </el-upload>
 
-          <!-- Autocomplete -->
           <el-autocomplete
             v-else-if="field.type === 'autocomplete'"
             v-model="internalModel[field.key]"
             :placeholder="field.placeholder"
-            v-bind="field.options"
+            v-bind="field.props"
             @change="handleFieldChange(field.key, internalModel[field.key])"
           />
         </el-form-item>
 
-        <!-- 操作按钮区域 -->
-        <div class="flex items-center justify-end gap-2" :style="getColSpanStyle(4)">
-          <slot name="actions" :collapsed="collapsed" :toggle="toggleCollapse">
+        <div
+          class="flex items-center gap-2"
+          :class="[
+            collapsed ? 'justify-start' : 'col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 justify-end',
+          ]"
+        >
+          <slot
+            name="actions"
+            :submit="handleSubmit"
+            :reset="handleReset"
+            :collapsed="collapsed"
+            :toggle="toggleCollapse"
+          >
             <el-button type="primary" @click="handleSubmit">
               {{ submitText }}
             </el-button>
             <el-button @click="handleReset">
               {{ resetText }}
             </el-button>
-            <el-button v-if="needCollapse" type="text" @click="toggleCollapse">
+            <el-button v-if="showCollapseButton" text type="primary" @click="toggleCollapse">
               {{ collapsed ? '展开' : '收起' }}
               <el-icon :class="{ 'rotate-180': !collapsed }">
                 <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">

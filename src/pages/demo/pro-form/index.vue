@@ -84,7 +84,7 @@ const formOptions: ProFormField[] = [
     type: 'input-number',
     placeholder: '请输入年龄',
     colSpan: 1,
-    options: {
+    props: {
       min: 1,
       max: 150,
     },
@@ -121,7 +121,7 @@ const formOptions: ProFormField[] = [
     placeholder: '请选择城市',
     colSpan: 1,
     choices: cities,
-    options: {
+    props: {
       clearable: true,
       filterable: true,
     },
@@ -134,7 +134,7 @@ const formOptions: ProFormField[] = [
     placeholder: '请选择地区',
     colSpan: 1,
     choices: regionOptions,
-    options: {
+    props: {
       clearable: true,
     },
     defaultValue: [],
@@ -159,7 +159,7 @@ const formOptions: ProFormField[] = [
     type: 'date',
     placeholder: '请选择日期',
     colSpan: 1,
-    options: {
+    props: {
       type: 'date',
       valueFormat: 'YYYY-MM-DD',
     },
@@ -171,7 +171,7 @@ const formOptions: ProFormField[] = [
     type: 'daterange',
     placeholder: '请选择日期范围',
     colSpan: 2,
-    options: {
+    props: {
       startPlaceholder: '开始日期',
       endPlaceholder: '结束日期',
       valueFormat: 'YYYY-MM-DD',
@@ -184,7 +184,7 @@ const formOptions: ProFormField[] = [
     type: 'timeselect',
     placeholder: '请选择时间',
     colSpan: 1,
-    options: {
+    props: {
       start: '08:00',
       end: '18:00',
       step: '00:30',
@@ -196,7 +196,7 @@ const formOptions: ProFormField[] = [
     label: '状态',
     type: 'switch',
     colSpan: 1,
-    options: {
+    props: {
       activeText: '启用',
       inactiveText: '禁用',
     },
@@ -207,7 +207,7 @@ const formOptions: ProFormField[] = [
     label: '评分',
     type: 'rate',
     colSpan: 1,
-    options: {
+    props: {
       allowHalf: true,
       showText: true,
     },
@@ -218,7 +218,7 @@ const formOptions: ProFormField[] = [
     label: '颜色',
     type: 'color',
     colSpan: 1,
-    options: {
+    props: {
       showAlpha: true,
     },
     defaultValue: '#409eff',
@@ -228,7 +228,7 @@ const formOptions: ProFormField[] = [
     label: '滑块',
     type: 'slider',
     colSpan: 2,
-    options: {
+    props: {
       showStops: true,
       step: 10,
     },
@@ -247,7 +247,7 @@ const formOptions: ProFormField[] = [
       { label: '选项5', value: '5' },
       { label: '选项6', value: '6' },
     ],
-    options: {
+    props: {
       titles: ['源列表', '目标列表'],
       filterable: true,
     },
@@ -259,7 +259,7 @@ const formOptions: ProFormField[] = [
     type: 'upload',
     colSpan: 2,
     placeholder: '点击上传',
-    options: {
+    props: {
       action: '#',
       listType: 'text',
       limit: 3,
@@ -272,7 +272,7 @@ const formOptions: ProFormField[] = [
     type: 'textarea',
     placeholder: '请输入描述',
     colSpan: 4,
-    options: {
+    props: {
       rows: 3,
     },
     defaultValue: '',
@@ -481,7 +481,7 @@ function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void)
               type: 'autocomplete',
               placeholder: '输入城市名称',
               colSpan: 2,
-              options: {
+              props: {
                 fetchSuggestions,
               },
               defaultValue: '',

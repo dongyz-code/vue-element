@@ -1,24 +1,23 @@
-import type { FormItemRule, FormRules } from 'element-plus';
-
-export type ProFormFieldType
-  = | 'input'
-    | 'textarea'
-    | 'input-number'
-    | 'select'
-    | 'cascader'
-    | 'date'
-    | 'daterange'
-    | 'time'
-    | 'timeselect'
-    | 'switch'
-    | 'checkbox'
-    | 'radio'
-    | 'rate'
-    | 'color'
-    | 'slider'
-    | 'transfer'
-    | 'upload'
-    | 'autocomplete';
+import type {
+  AutocompleteProps,
+  CascaderProps,
+  CheckboxGroupProps,
+  ColorPickerProps,
+  DatePickerProps,
+  FormItemRule,
+  FormRules,
+  InputNumberProps,
+  InputProps,
+  RadioGroupProps,
+  RateProps,
+  SelectProps,
+  SliderProps,
+  SwitchProps,
+  TimePickerDefaultProps,
+  TimeSelectProps,
+  TransferProps,
+  UploadProps,
+} from 'element-plus';
 
 export interface ProFormOption {
   label: string;
@@ -28,51 +27,120 @@ export interface ProFormOption {
   [key: string]: any;
 }
 
-export interface ProFormField {
-  /** 字段唯一标识 */
+interface ProFormFieldBase {
   key: string;
-  /** 字段标签 */
   label: string;
-  /** 字段类型 */
-  type: ProFormFieldType;
-  /** 占位符 */
   placeholder?: string;
-  /** 列跨度 (1-4) */
   colSpan?: number;
-  /** 控件配置 */
-  options?: Record<string, any>;
-  /** 选项数据 (用于 select、checkbox、radio 等) */
   choices?: ProFormOption[];
-  /** 字段级校验规则 */
   rules?: FormItemRule[];
-  /** 是否显示 (支持函数动态控制) */
   visible?: boolean | ((ctx: { model: Record<string, any> }) => boolean);
-  /** 插槽名称 (true 表示使用 #field-[key]) */
   slot?: string | boolean;
-  /** 默认值 */
   defaultValue?: any;
 }
 
+export type InputField = ProFormFieldBase & {
+  type: 'input';
+  props?: Partial<InputProps>;
+};
+
+export type TextareaField = ProFormFieldBase & {
+  type: 'textarea';
+  props?: Partial<InputProps>;
+};
+
+export type InputNumberField = ProFormFieldBase & {
+  type: 'input-number';
+  props?: Partial<InputNumberProps>;
+};
+
+export type SelectField = ProFormFieldBase & {
+  type: 'select';
+  props?: Partial<SelectProps>;
+};
+
+export type CascaderField = ProFormFieldBase & {
+  type: 'cascader';
+  props?: Partial<CascaderProps>;
+};
+
+export type DateField = ProFormFieldBase & {
+  type: 'date';
+  props?: Partial<DatePickerProps>;
+};
+
+export type DateRangeField = ProFormFieldBase & {
+  type: 'daterange';
+  props?: Partial<DatePickerProps>;
+};
+
+export type TimeField = ProFormFieldBase & {
+  type: 'time';
+  props?: Partial<TimePickerDefaultProps>;
+};
+
+export type TimeSelectField = ProFormFieldBase & {
+  type: 'timeselect';
+  props?: Partial<TimeSelectProps>;
+};
+
+export type SwitchField = ProFormFieldBase & {
+  type: 'switch';
+  props?: Partial<SwitchProps>;
+};
+
+export type CheckboxField = ProFormFieldBase & {
+  type: 'checkbox';
+  props?: Partial<CheckboxGroupProps>;
+};
+
+export type RadioField = ProFormFieldBase & {
+  type: 'radio';
+  props?: Partial<RadioGroupProps>;
+};
+
+export type RateField = ProFormFieldBase & {
+  type: 'rate';
+  props?: Partial<RateProps>;
+};
+
+export type ColorField = ProFormFieldBase & {
+  type: 'color';
+  props?: Partial<ColorPickerProps>;
+};
+
+export type SliderField = ProFormFieldBase & {
+  type: 'slider';
+  props?: Partial<SliderProps>;
+};
+
+export type TransferField = ProFormFieldBase & {
+  type: 'transfer';
+  props?: Partial<TransferProps>;
+};
+
+export type UploadField = ProFormFieldBase & {
+  type: 'upload';
+  props?: Partial<UploadProps>;
+};
+
+export type AutocompleteField = ProFormFieldBase & {
+  type: 'autocomplete';
+  props?: Partial<AutocompleteProps>;
+};
+
+export type ProFormField = InputField | TextareaField | InputNumberField | SelectField | CascaderField | DateField | DateRangeField | TimeField | TimeSelectField | SwitchField | CheckboxField | RadioField | RateField | ColorField | SliderField | TransferField | UploadField | AutocompleteField;
+
 export interface ProFormProps {
-  /** 表单数据 (v-model) */
   modelValue: Record<string, any>;
-  /** 字段配置数组 */
   options: ProFormField[];
-  /** 表单校验规则 */
   rules?: FormRules;
-  /** 标签宽度 */
   labelWidth?: string | number;
-  /** 折叠展示的行数 */
   collapseToRows?: number;
-  /** 默认是否折叠 */
   defaultCollapsed?: boolean;
-  /** 是否显示折叠按钮 */
   showCollapse?: boolean;
-  /** 提交按钮文本 */
   submitText?: string;
-  /** 重置按钮文本 */
   resetText?: string;
-  /** 透传给 el-form 的额外属性 */
   formProps?: Record<string, any>;
 }
 
@@ -85,10 +153,7 @@ export interface ProFormEmits {
 }
 
 export interface ProFormExpose {
-  /** 表单校验 */
   validate: () => Promise<void>;
-  /** 清除校验 */
   clearValidate: () => void;
-  /** 重置表单 */
   resetFields: () => void;
 }

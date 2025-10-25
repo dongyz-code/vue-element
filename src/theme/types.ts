@@ -1,17 +1,19 @@
-export type Theme = {
-  element_theme?: {
+export type ThemeConfig = {
+  element_theme: {
     /** 主题色 */
-    primary?: string;
+    primary: string;
     /** 信息色 */
-    info?: string;
+    info: string;
     /** 警告色 */
-    warning?: string;
+    warning: string;
     /** 成功色 */
-    success?: string;
+    success: string;
     /** 危险色 */
-    danger?: string;
+    danger: string;
   };
-  colors?: {
-    '--color-primary'?: string;
+  colors: {
+    '--color-primary': string;
   };
 };
+
+export type ThemeKey = 'default'

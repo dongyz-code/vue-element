@@ -76,11 +76,11 @@ function generateData(count: number): UserData[] {
 
   return Array.from({ length: count }, (_, index) => ({
     id: index + 1,
-    name: names[Math.floor(Math.random() * names.length)],
+    name: names[Math.floor(Math.random() * names.length)]!,
     email: `user${index + 1}@example.com`,
     age: 20 + Math.floor(Math.random() * 30),
     status: Math.random() > 0.5 ? 1 : 0,
-    department: departments[Math.floor(Math.random() * departments.length)],
+    department: departments[Math.floor(Math.random() * departments.length)]!,
   }));
 }
 

@@ -64,7 +64,7 @@ export type ProTableProps<T extends DefaultRow = DefaultRow> = {
   /** 列配置 */
   columns: ProTableColumn<T>[];
   /** 是否显示选择列 */
-  selection?: {
+  selectionConfig?: {
     /** 默认选择项 */
     defaultSelectionKeys?: string[];
     /** 选择模式 */

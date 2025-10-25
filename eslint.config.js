@@ -21,6 +21,6 @@ export default antfu({
     'unused-imports/no-unused-vars': 'warn',
     'vue/html-self-closing': 'off',
     /** ts 关闭 type 转 interface 的规则 */
-    'ts/consistent-type-definitions': 'off',
+    'ts/consistent-type-definitions': 'off'
   },
 });

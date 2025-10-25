@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useTheme } from './theme';
+
+useTheme();
 </script>
 
 <template>

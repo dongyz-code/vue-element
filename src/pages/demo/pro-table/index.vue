@@ -19,7 +19,7 @@ interface UserData {
 // 响应式数据
 const loading = ref(true);
 const tableData = ref<UserData[]>([]);
-const selectedRows = ref<UserData[]>([]);
+const selectedRows = ref<UserData[]>(['1']);
 const crossPageSelectedRows = ref<UserData[]>([]);
 const singleSelectedRows = ref<UserData[]>([]);
 
@@ -253,10 +253,10 @@ onMounted(() => {
         <div class="card-header">
           <span>ProTable 组件示例</span>
           <div class="header-actions">
-            <el-button @click="handleAdd">
+            <el-button type="primary" @click="handleAdd">
               新增
             </el-button>
-            <el-button :disabled="selectedRows.length === 0" @click="handleBatchDelete">
+            <el-button type="danger" :disabled="selectedRows.length === 0" @click="handleBatchDelete">
               批量删除 ({{ selectedRows.length }})
             </el-button>
             <el-button @click="handleClearSelection">
@@ -271,6 +271,9 @@ onMounted(() => {
         <h3>基础表格</h3>
         <ProTable
           v-model:selection="selectionKeys"
+          :selection-config="{
+            type: 'radio',
+          }"
           :data="tableData"
           :columns="columns"
           :loading="loading"

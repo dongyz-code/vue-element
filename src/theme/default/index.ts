@@ -1,15 +1,19 @@
-import type { Theme } from '../types';
+import type { ThemeConfig } from '../types';
 
 /**
  * 默认主题
  */
-export const defaultTheme: Theme = {
+const theme: ThemeConfig = {
   element_theme: {
-    primary: '#FF6A00',
-    info: '#eeeeee',
-    warning: '#fbbd23',
-    danger: '#f87272',
-    success: '#36d399',
+    primary: '#165DFF',
+    info: '#303030',
+    warning: '#FF7D00',
+    danger: '#F53F3F',
+    success: '#00B42A',
   },
-  colors: {},
+  colors: {
+    '--color-primary': '#0081E4',
+  },
 };
+
+export default theme;

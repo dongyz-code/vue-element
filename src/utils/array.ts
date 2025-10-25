@@ -45,3 +45,7 @@ export function arrObject(arr: any[], key?: any, value?: any): Record<string, an
   }
   return map;
 }
+
+export function getKeys<T extends object>(obj: T) {
+  return Object.keys(obj) as (keyof T)[];
+}

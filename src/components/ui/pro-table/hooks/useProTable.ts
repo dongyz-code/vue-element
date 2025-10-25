@@ -42,11 +42,11 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
   } = useTreeSelection({
     data: toRef(props, 'data'),
     option: {
-      type: props.selection?.type ?? 'checkbox',
-      checkStrictly: props.selection?.checkStrictly ?? false,
+      type: props.selectionConfig?.type ?? 'checkbox',
+      checkStrictly: props.selectionConfig?.checkStrictly ?? false,
       rowKey: getRowKey,
       selectionKeys: hasExternalSelection ? externalSelectionKeys : undefined,
-      defaultSelectionKeys: props.selection?.defaultSelectionKeys ?? [],
+      defaultSelectionKeys: props.selectionConfig?.defaultSelectionKeys ?? [],
     },
   });
 

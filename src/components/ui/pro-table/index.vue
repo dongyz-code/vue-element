@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T extends DefaultRow = DefaultRow">
 import type { ElTable } from 'element-plus';
 import type { DefaultRow, ProTableEmits, ProTableExpose, ProTableProps } from './types';
-
 import type { Key } from '@/types';
+
 import { useProTable } from './hooks/useProTable';
 
 const props = withDefaults(defineProps<ProTableProps<T>>(), {
@@ -90,11 +90,11 @@ defineExpose<ProTableExpose<T>>({
 
       <!-- 选择列 -->
       <el-table-column
-        v-if="selection"
+        v-if="$attrs.selection || selectionConfig"
         :width="55"
-        :fixed="selection.fixed"
+        :fixed="selectionConfig?.fixed"
       >
-        <template #header>
+        <template v-if="selectionConfig?.type === 'checkbox'" #header>
           <el-checkbox
             :disabled="loading"
             :model-value="headerChecked.checked"

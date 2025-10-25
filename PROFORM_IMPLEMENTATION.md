@@ -13,7 +13,12 @@
   - rate, color, slider
   - transfer, upload, autocomplete
 
-### 2. 核心组件 (ProForm.vue)
+### 2. 核心组件 (ProForm.vue) - 重构为优雅的渲染函数架构
+- ✅ **渲染逻辑抽取到 TypeScript**
+  - 使用 Vue 3 的 `h` 函数和组件映射
+  - `resolveFieldComponent(field)` 函数统一处理所有组件类型
+  - `renderFieldControl(field)` 生成 VNode
+  - 模板保持简洁，仅一行 `<component :is="renderFieldControl(field)" />`
 - ✅ 智能布局系统
   - 收起状态：按钮与字段在同一行
   - 展开状态：按钮独占一行右对齐
@@ -83,6 +88,52 @@
   <!-- 按钮独占一行，右对齐 -->
 </div>
 ```
+
+## 架构优势
+
+### 重构前（模板驱动）
+```vue
+<template>
+  <el-input v-if="field.type === 'input'" ... />
+  <el-select v-else-if="field.type === 'select'" ... />
+  <el-date-picker v-else-if="field.type === 'date'" ... />
+  <!-- 17 个 v-if/v-else-if 分支，300+ 行模板代码 -->
+</template>
+```
+
+### 重构后（渲染函数驱动）
+```vue
+<template>
+  <!-- 仅一行，简洁优雅 -->
+  <component :is="renderFieldControl(field)" />
+</template>
+
+<script setup lang="ts">
+// 所有组件渲染逻辑在 TypeScript 中统一管理
+function resolveFieldComponent(field: ProFormField): FieldRenderConfig {
+  switch (field.type) {
+    case 'input': return { component: ElInput, props: baseProps };
+    case 'select': return { 
+      component: ElSelect, 
+      props: baseProps,
+      children: field.choices?.map(opt => h(ElOption, { ... }))
+    };
+    // ...
+  }
+}
+
+function renderFieldControl(field: ProFormField): VNode {
+  const config = resolveFieldComponent(field);
+  return h(config.component, config.props, config.children);
+}
+</script>
+```
+
+**优势**：
+1. **可维护性**：组件渲染逻辑集中管理，易于扩展新类型
+2. **可读性**：模板简洁清晰，逻辑在 TypeScript 中更易理解
+3. **类型安全**：渲染配置有完整的 TypeScript 类型定义
+4. **性能**：减少模板编译复杂度
 
 ## 代码质量
 

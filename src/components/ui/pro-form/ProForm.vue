@@ -1,7 +1,32 @@
 <script setup lang="ts">
 import type { FormInstance } from 'element-plus';
+import type { Component, VNode } from 'vue';
 import type { ProFormEmits, ProFormExpose, ProFormField, ProFormProps } from './types';
-import { computed, ref } from 'vue';
+
+import {
+  ElAutocomplete,
+  ElButton,
+  ElCascader,
+  ElCheckbox,
+  ElCheckboxGroup,
+  ElColorPicker,
+  ElDatePicker,
+  ElIcon,
+  ElInput,
+  ElInputNumber,
+  ElOption,
+  ElRadio,
+  ElRadioGroup,
+  ElRate,
+  ElSelect,
+  ElSlider,
+  ElSwitch,
+  ElTimePicker,
+  ElTimeSelect,
+  ElTransfer,
+  ElUpload,
+} from 'element-plus';
+import { computed, h, ref } from 'vue';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
   labelWidth: '100px',
@@ -119,6 +144,232 @@ function getColSpanStyle(colSpan?: number) {
   };
 }
 
+interface FieldRenderConfig {
+  component: Component;
+  props: Record<string, any>;
+  children?: VNode | VNode[];
+}
+
+function resolveFieldComponent(field: ProFormField): FieldRenderConfig {
+  const baseProps = {
+    'modelValue': internalModel.value[field.key],
+    'onUpdate:modelValue': (val: any) => {
+      internalModel.value[field.key] = val;
+    },
+    'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+    'placeholder': field.placeholder,
+    ...field.props,
+  };
+
+  switch (field.type) {
+    case 'input':
+      return {
+        component: ElInput,
+        props: baseProps,
+      };
+
+    case 'textarea':
+      return {
+        component: ElInput,
+        props: { ...baseProps, type: 'textarea' },
+      };
+
+    case 'input-number':
+      return {
+        component: ElInputNumber,
+        props: baseProps,
+      };
+
+    case 'select':
+      return {
+        component: ElSelect,
+        props: baseProps,
+        children: field.choices?.map(option =>
+          h(ElOption, {
+            key: option.value,
+            label: option.label,
+            value: option.value,
+            disabled: option.disabled,
+          }),
+        ),
+      };
+
+    case 'cascader':
+      return {
+        component: ElCascader,
+        props: {
+          ...baseProps,
+          options: field.choices,
+        },
+      };
+
+    case 'date':
+      return {
+        component: ElDatePicker,
+        props: baseProps,
+      };
+
+    case 'daterange':
+      return {
+        component: ElDatePicker,
+        props: {
+          ...baseProps,
+          type: 'daterange',
+        },
+      };
+
+    case 'time':
+      return {
+        component: ElTimePicker,
+        props: baseProps,
+      };
+
+    case 'timeselect':
+      return {
+        component: ElTimeSelect,
+        props: baseProps,
+      };
+
+    case 'switch':
+      return {
+        component: ElSwitch,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+      };
+
+    case 'checkbox':
+      return {
+        component: ElCheckboxGroup,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+        children: field.choices?.map(option =>
+          h(ElCheckbox, {
+            key: option.value,
+            value: option.value,
+            disabled: option.disabled,
+          }, { default: () => option.label }),
+        ),
+      };
+
+    case 'radio':
+      return {
+        component: ElRadioGroup,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+        children: field.choices?.map(option =>
+          h(ElRadio, {
+            key: option.value,
+            value: option.value,
+            disabled: option.disabled,
+          }, { default: () => option.label }),
+        ),
+      };
+
+    case 'rate':
+      return {
+        component: ElRate,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+      };
+
+    case 'color':
+      return {
+        component: ElColorPicker,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+      };
+
+    case 'slider':
+      return {
+        component: ElSlider,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+      };
+
+    case 'transfer':
+      return {
+        component: ElTransfer,
+        props: {
+          'modelValue': internalModel.value[field.key],
+          'onUpdate:modelValue': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          'data': field.choices,
+          'props': { key: 'value', label: 'label', disabled: 'disabled' },
+          ...field.props,
+        },
+      };
+
+    case 'upload':
+      return {
+        component: ElUpload,
+        props: {
+          'fileList': internalModel.value[field.key],
+          'onUpdate:fileList': (val: any) => {
+            internalModel.value[field.key] = val;
+          },
+          'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
+          ...field.props,
+        },
+        children: h(ElButton, { type: 'primary' }, { default: () => field.placeholder || '点击上传' }),
+      };
+
+    case 'autocomplete':
+      return {
+        component: ElAutocomplete,
+        props: baseProps,
+      };
+
+    default:
+      return {
+        component: ElInput,
+        props: baseProps,
+      };
+  }
+}
+
+function renderFieldControl(field: ProFormField): VNode {
+  const config = resolveFieldComponent(field);
+  return h(config.component, config.props, config.children);
+}
+
 async function validate() {
   await formRef.value?.validate();
 }
@@ -165,176 +416,7 @@ defineExpose<ProFormExpose>({
             :form="formRef"
           />
 
-          <el-input
-            v-else-if="field.type === 'input'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-input
-            v-else-if="field.type === 'textarea'"
-            v-model="internalModel[field.key]"
-            type="textarea"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-input-number
-            v-else-if="field.type === 'input-number'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-select
-            v-else-if="field.type === 'select'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          >
-            <el-option
-              v-for="option in field.choices"
-              :key="option.value"
-              :label="option.label"
-              :value="option.value"
-              :disabled="option.disabled"
-            />
-          </el-select>
-
-          <el-cascader
-            v-else-if="field.type === 'cascader'"
-            v-model="internalModel[field.key]"
-            :options="field.choices"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-date-picker
-            v-else-if="field.type === 'date'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-date-picker
-            v-else-if="field.type === 'daterange'"
-            v-model="internalModel[field.key]"
-            type="daterange"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-time-picker
-            v-else-if="field.type === 'time'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-time-select
-            v-else-if="field.type === 'timeselect'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-switch
-            v-else-if="field.type === 'switch'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-checkbox-group
-            v-else-if="field.type === 'checkbox'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          >
-            <el-checkbox
-              v-for="option in field.choices"
-              :key="option.value"
-              :value="option.value"
-              :disabled="option.disabled"
-            >
-              {{ option.label }}
-            </el-checkbox>
-          </el-checkbox-group>
-
-          <el-radio-group
-            v-else-if="field.type === 'radio'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          >
-            <el-radio
-              v-for="option in field.choices"
-              :key="option.value"
-              :value="option.value"
-              :disabled="option.disabled"
-            >
-              {{ option.label }}
-            </el-radio>
-          </el-radio-group>
-
-          <el-rate
-            v-else-if="field.type === 'rate'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-color-picker
-            v-else-if="field.type === 'color'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-slider
-            v-else-if="field.type === 'slider'"
-            v-model="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-transfer
-            v-else-if="field.type === 'transfer'"
-            v-model="internalModel[field.key]"
-            :data="field.choices"
-            :props="{ key: 'value', label: 'label', disabled: 'disabled' }"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
-
-          <el-upload
-            v-else-if="field.type === 'upload'"
-            v-model:file-list="internalModel[field.key]"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          >
-            <el-button type="primary">
-              {{ field.placeholder || '点击上传' }}
-            </el-button>
-          </el-upload>
-
-          <el-autocomplete
-            v-else-if="field.type === 'autocomplete'"
-            v-model="internalModel[field.key]"
-            :placeholder="field.placeholder"
-            v-bind="field.props"
-            @change="handleFieldChange(field.key, internalModel[field.key])"
-          />
+          <component :is="renderFieldControl(field)" v-else />
         </el-form-item>
 
         <div
@@ -350,20 +432,20 @@ defineExpose<ProFormExpose>({
             :collapsed="collapsed"
             :toggle="toggleCollapse"
           >
-            <el-button type="primary" @click="handleSubmit">
+            <ElButton type="primary" @click="handleSubmit">
               {{ submitText }}
-            </el-button>
-            <el-button @click="handleReset">
+            </ElButton>
+            <ElButton @click="handleReset">
               {{ resetText }}
-            </el-button>
-            <el-button v-if="showCollapseButton" text type="primary" @click="toggleCollapse">
+            </ElButton>
+            <ElButton v-if="showCollapseButton" text type="primary" @click="toggleCollapse">
               {{ collapsed ? '展开' : '收起' }}
-              <el-icon :class="{ 'rotate-180': !collapsed }">
+              <ElIcon :class="{ 'rotate-180': !collapsed }">
                 <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
                   <path fill="currentColor" d="M831.872 340.864 512 652.672 192.128 340.864a30.592 30.592 0 0 0-42.752 0 29.12 29.12 0 0 0 0 41.6L489.664 714.24a32 32 0 0 0 44.672 0l340.288-331.712a29.12 29.12 0 0 0 0-41.728 30.592 30.592 0 0 0-42.752 0z" />
                 </svg>
-              </el-icon>
-            </el-button>
+              </ElIcon>
+            </ElButton>
           </slot>
         </div>
       </div>

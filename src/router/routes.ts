@@ -33,6 +33,11 @@ export const routes: RouteItem[] = [
         component: () => import('@/pages/demo/pro-table/simple.vue'),
       },
       {
+        path: 'demo/pro-form',
+        name: 'demo-pro-form',
+        component: () => import('@/pages/demo/pro-form/index.vue'),
+      },
+      {
         path: '/:catchAll(.*)',
         redirect: '/404',
       },

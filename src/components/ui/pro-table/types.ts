@@ -1,6 +1,7 @@
 import type { TableColumnCtx } from 'element-plus';
 import type { VNode } from 'vue';
 import type { PageData } from '../pagination/types';
+import type { Key } from '@/types';
 
 export type DefaultRow = {
   [key: number]: any;
@@ -80,7 +81,7 @@ export type ProTableProps<T extends DefaultRow = DefaultRow> = {
   /** 列的宽度是否自撑开 */
   fit?: boolean;
   /** 行唯一标识字段 */
-  rowKey?: string | ((row: T) => string);
+  rowKey?: string | ((row: T) => Key);
   /** 是否显示分页 */
   pagination?: Partial<PageData>;
   /** 加载状态 */
@@ -119,18 +120,10 @@ export type ProTableEmits<T extends DefaultRow = DefaultRow> = {
 };
 
 export type ProTableExpose<T extends DefaultRow = DefaultRow> = {
-  /** 获取已选择的行 keys */
-  getSelectedRowKeys: () => (string | number)[];
   /** 清空选择 */
   clearSelection: () => void;
-  /** 切换行选择状态 */
-  toggleRowSelection: (row: T, selected?: boolean) => void;
-  /** 全选/取消全选 */
-  toggleAllSelection: () => void;
-  /** 根据 key 设置行选择状态 */
-  setRowSelectionByKey: (key: string | number, selected: boolean) => void;
-  /** 根据 keys 批量设置选择状态 */
-  setRowSelectionsByKeys: (keys: (string | number)[]) => void;
   /** 刷新表格 */
   refresh: () => void;
+  /** 设置表格数据 */
+  setPageData: (pageDate: PageData) => void;
 };

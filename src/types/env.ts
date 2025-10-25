@@ -9,3 +9,6 @@ export type APP_CONFIG = {
   /** API基础路径 */
   API_BASE_URL: string;
 };
+
+/** 键类型 */
+export type Key = string | number | symbol;

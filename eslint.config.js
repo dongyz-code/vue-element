@@ -18,6 +18,7 @@ export default antfu({
     'no-debugger': 'off',
     'no-unused-vars': 'warn',
     'unused-imports/no-unused-imports': 'warn',
+    'unused-imports/no-unused-vars': 'warn',
     'vue/html-self-closing': 'off',
     /** ts 关闭 type 转 interface 的规则 */
     'ts/consistent-type-definitions': 'off',

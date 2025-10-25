@@ -17,11 +17,13 @@ interface UserData {
 }
 
 // 响应式数据
-const loading = ref(false);
+const loading = ref(true);
 const tableData = ref<UserData[]>([]);
 const selectedRows = ref<UserData[]>([]);
 const crossPageSelectedRows = ref<UserData[]>([]);
 const singleSelectedRows = ref<UserData[]>([]);
+
+const selectionKeys = ref([1, 2]);
 
 // 分页配置
 const pageConfig = reactive({
@@ -51,10 +53,10 @@ const columns: ProTableColumn<UserData>[] = [
     label: '姓名',
     width: 120,
     sortable: true,
-    filterOptions: [
-      { label: '张三', value: '张三' },
-      { label: '李四', value: '李四' },
-      { label: '王五', value: '王五' },
+    filters: [
+      { text: '张三', value: '张三' },
+      { text: '李四', value: '李四' },
+      { text: '王五', value: '王五' },
     ],
   },
   {
@@ -68,10 +70,10 @@ const columns: ProTableColumn<UserData>[] = [
     label: '年龄',
     width: 80,
     sortable: true,
-    filterOptions: [
-      { label: '20-30', value: '20-30' },
-      { label: '30-40', value: '30-40' },
-      { label: '40-50', value: '40-50' },
+    filters: [
+      { text: '20-30', value: '20-30' },
+      { text: '30-40', value: '30-40' },
+      { text: '40-50', value: '40-50' },
     ],
   },
   {
@@ -79,19 +81,19 @@ const columns: ProTableColumn<UserData>[] = [
     label: '状态',
     width: 100,
     slot: 'status',
-    filterOptions: [
-      { label: '启用', value: 1 },
-      { label: '禁用', value: 0 },
+    filters: [
+      { text: '启用', value: 1 },
+      { text: '禁用', value: 0 },
     ],
   },
   {
     prop: 'department',
     label: '部门',
     minWidth: 120,
-    filterOptions: [
-      { label: '技术部', value: '技术部' },
-      { label: '产品部', value: '产品部' },
-      { label: '运营部', value: '运营部' },
+    filters: [
+      { text: '技术部', value: '技术部' },
+      { text: '产品部', value: '产品部' },
+      { text: '运营部', value: '运营部' },
     ],
   },
   {
@@ -107,6 +109,7 @@ const columns: ProTableColumn<UserData>[] = [
     slot: 'actions',
     fixed: 'right',
   },
+
 ];
 
 // 生成模拟数据
@@ -182,7 +185,7 @@ function handleEdit(row: UserData) {
   ElMessage.info(`编辑用户: ${row.name}`);
 }
 
-async function handleDelete(row: UserData) {
+async function handleDelete(_row: UserData) {
   try {
     await ElMessageBox.confirm('确定要删除这条记录吗？', '提示', {
       confirmButtonText: '确定',
@@ -223,7 +226,7 @@ async function loadData() {
   loading.value = true;
   try {
     // 模拟 API 请求
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     const allData = generateMockData(100);
     const start = (pageConfig.currentPage - 1) * pageConfig.pageSize;
@@ -267,6 +270,7 @@ onMounted(() => {
       <div class="demo-section">
         <h3>基础表格</h3>
         <ProTable
+          v-model:selection="selectionKeys"
           :data="tableData"
           :columns="columns"
           :loading="loading"
@@ -294,9 +298,9 @@ onMounted(() => {
           @page-change="handlePageChange"
         >
           <!-- 自定义状态列 -->
-          <template #status="{ row, value }">
-            <el-tag :type="getStatusType(value)">
-              {{ getStatusText(value) }}
+          <template #status="{ row }">
+            <el-tag :type="getStatusType(row.status)">
+              {{ getStatusText(row.status) }}
             </el-tag>
           </template>
 
@@ -325,8 +329,8 @@ onMounted(() => {
           @page-change="handlePageChange"
         >
           <!-- 自定义头像列 -->
-          <template #avatar="{ row, value }">
-            <el-avatar :src="value" :size="40">
+          <template #avatar="{ row }">
+            <el-avatar :src="row.avatar" :size="40">
               {{ row.name?.charAt(0) }}
             </el-avatar>
           </template>

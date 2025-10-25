@@ -1,6 +1,8 @@
 <script setup lang="ts" generic="T extends DefaultRow = DefaultRow">
 import type { ElTable } from 'element-plus';
 import type { DefaultRow, ProTableEmits, ProTableExpose, ProTableProps } from './types';
+
+import type { Key } from '@/types';
 import { useProTable } from './hooks/useProTable';
 
 const props = withDefaults(defineProps<ProTableProps<T>>(), {
@@ -25,14 +27,17 @@ const props = withDefaults(defineProps<ProTableProps<T>>(), {
 // Emits 定义
 const emit = defineEmits<ProTableEmits<T>>();
 
-const selectionKeys = defineModel<string[]>('selection', { default: () => [] });
+defineSlots<{
+  [key: string]: (props: any) => any;
+}>();
+
+const selectionKeys = defineModel<Key[]>('selection', { default: () => [] });
 
 const {
   tableRef,
   visibleColumns,
   tableData,
   getRowKey,
-  getValue,
   setPageData,
   handleFilterChange,
   handleRowClick,
@@ -42,10 +47,8 @@ const {
 
   /** 选择相关 */
   headerChecked,
-  halfCheckedSet,
   toggleRowSelection,
   clearSelection,
-  setSelection,
   isChecked,
   isHalfChecked,
   toggleAllSelection,
@@ -58,7 +61,6 @@ defineExpose<ProTableExpose<T>>({
   refresh,
   setPageData,
   clearSelection,
-  setSelection,
 });
 </script>
 
@@ -71,7 +73,7 @@ defineExpose<ProTableExpose<T>>({
       :fit="fit"
       :default-expand-all="defaultExpandAll"
       :expand-row-keys="expandRowKeys"
-      :row-key="rowKey"
+      :row-key="getRowKey"
       :data="tableData"
       :height="height"
       :max-height="maxHeight"
@@ -80,7 +82,6 @@ defineExpose<ProTableExpose<T>>({
       :show-header="showHeader"
       :empty-text="emptyText"
       :loading="loading"
-      class="w-full"
       @row-click="handleRowClick"
       @row-dblclick="handleRowDblclick"
       @filter-change="handleFilterChange"
@@ -95,6 +96,7 @@ defineExpose<ProTableExpose<T>>({
       >
         <template #header>
           <el-checkbox
+            :disabled="loading"
             :model-value="headerChecked.checked"
             :indeterminate="headerChecked.halfChecked"
             @change="toggleAllSelection($event as boolean)"
@@ -134,14 +136,11 @@ defineExpose<ProTableExpose<T>>({
         :filter-multiple="column.filterMultiple"
         :filter-method="column.filterMethod"
       >
-        <template v-if="column.slot && $slots[column.slot]" #default="{ row, $index }">
+        <template v-if="column.slot && $slots[column.slot]" #default="{ row }">
           <!-- 插槽自定义渲染 -->
           <slot
             :name="column.slot"
             :row="row"
-            :column="column"
-            :index="$index"
-            :value="getValue(row, column.prop!)"
           />
         </template>
 
@@ -152,7 +151,9 @@ defineExpose<ProTableExpose<T>>({
     </el-table>
 
     <!-- 分页 -->
-    <PageComponent @update="handlePageChange" />
+    <div v-if="pagination" class="mt-4 flex justify-end">
+      <PageComponent @update="handlePageChange" />
+    </div>
   </div>
 </template>
 

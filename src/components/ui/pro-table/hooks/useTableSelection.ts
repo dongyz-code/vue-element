@@ -1,8 +1,8 @@
 import type { Ref } from 'vue';
 import type { DefaultRow } from '../types';
+import type { Key } from '@/types';
 
-import { computed, ref, watchEffect } from 'vue';
-import { arrObject } from '@/utils';
+import { computed, ref } from 'vue';
 
 export function useTreeSelection<T extends DefaultRow = DefaultRow>({
   data,
@@ -13,9 +13,9 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
     type: 'checkbox' | 'radio';
     childrenField?: string;
     checkStrictly: boolean;
-    selectionKeys?: Ref<string[]>;
-    defaultSelectionKeys?: string[];
-    rowKey: (row: T) => string;
+    selectionKeys?: Ref<Key[]>;
+    defaultSelectionKeys?: Key[];
+    rowKey: (row: T) => Key;
   };
 }) {
   type TreeNode = T & { parent: TreeNode | null };
@@ -33,13 +33,13 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
   /**
    * 状态
    */
-  const innerSelectionKeys = ref(defaultSelectionKeys ?? []);
+  const innerSelectionKeys = ref<Key[]>(defaultSelectionKeys ?? []);
   const halfCheckedSet = ref(new Set<string>());
   const selectionKeys = computed({
     get() {
       return externalSelectionKeys ? externalSelectionKeys.value : innerSelectionKeys.value;
     },
-    set(value: string[]) {
+    set(value: Key[]) {
       if (externalSelectionKeys) {
         externalSelectionKeys.value = value;
       }
@@ -225,7 +225,7 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
   const headerChecked = computed(() => {
     const allKeys = Array.from(treeData.value.treeMap.keys());
 
-    const isChecked = allKeys.every(key => selectionKeySet.value.has(key));
+    const isChecked = !!allKeys.length && allKeys.every(key => selectionKeySet.value.has(key));
 
     const isHalfChecked = allKeys.some(key => selectionKeySet.value.has(key));
 
@@ -235,10 +235,6 @@ export function useTreeSelection<T extends DefaultRow = DefaultRow>({
     };
   });
 
-  watchEffect(() => {
-    console.log('selectionKeys.value =', selectionKeys.value);
-    console.log('selectionKeySet.value =', selectionKeySet.value);
-  });
   /**
    * 选中全部
    */

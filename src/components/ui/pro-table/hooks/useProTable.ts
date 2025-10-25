@@ -2,6 +2,8 @@ import type { ElTable } from 'element-plus';
 import type { EmitFn, Ref } from 'vue';
 import type { DefaultRow, ProTableColumn, ProTableEmits, ProTableProps } from '../types';
 
+import type { Key } from '@/types';
+
 import { get } from 'lodash-es';
 import { computed, nextTick, ref, toRef, useAttrs, watch } from 'vue';
 import { usePage } from '../../pagination';
@@ -10,7 +12,7 @@ import { useTreeSelection } from './useTableSelection';
 export type UseProTableOptions<T extends DefaultRow = DefaultRow> = {
   props: ProTableProps<T>;
   emit: EmitFn<ProTableEmits<T>>;
-  selectionKeys: Ref<string[]>;
+  selectionKeys: Ref<Key[]>;
 };
 
 /**
@@ -72,7 +74,7 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
     }
 
     if (typeof props.rowKey === 'function') {
-      return props.rowKey(row);
+      return props.rowKey(row) as string;
     }
     return row[props.rowKey as keyof T];
   }
@@ -145,7 +147,7 @@ export function useProTable<T extends DefaultRow = DefaultRow>({
    */
   watch(() => props.pagination, (newVal) => {
     if (newVal) {
-      pageData.value = newVal;
+      setPageData(newVal);
     }
   }, { deep: true });
 

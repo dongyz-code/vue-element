@@ -58,13 +58,8 @@ defineExpose<ProFormExpose>({
     v-bind="formProps"
   >
     <div
-      class="grid gap-4"
-      :class="{
-        'grid-cols-1': currentCols === 1,
-        'grid-cols-2': currentCols === 2,
-        'grid-cols-3': currentCols === 3,
-        'grid-cols-4': currentCols === 4,
-      }"
+      class=" grid gap-4"
+      :class="[`grid-cols-${currentCols}`]"
     >
       <el-form-item
         v-for="field in displayFields"

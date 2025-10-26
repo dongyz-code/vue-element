@@ -1,6 +1,6 @@
 import type { Component, VNode } from 'vue';
-
 import type { ProFormField } from '../types';
+
 import {
   ElAutocomplete,
   ElButton,
@@ -25,6 +25,26 @@ import {
 } from 'element-plus';
 import { h } from 'vue';
 import { normalizeOptions } from './optionsNormalizer';
+
+import 'element-plus/es/components/autocomplete/style/css';
+import 'element-plus/es/components/button/style/css';
+import 'element-plus/es/components/cascader/style/css';
+import 'element-plus/es/components/checkbox/style/css';
+import 'element-plus/es/components/checkbox-group/style/css';
+import 'element-plus/es/components/color-picker/style/css';
+import 'element-plus/es/components/date-picker/style/css';
+import 'element-plus/es/components/input/style/css';
+import 'element-plus/es/components/input-number/style/css';
+import 'element-plus/es/components/time-picker/style/css';
+import 'element-plus/es/components/time-select/style/css';
+import 'element-plus/es/components/transfer/style/css';
+import 'element-plus/es/components/upload/style/css';
+import 'element-plus/es/components/select/style/css';
+import 'element-plus/es/components/slider/style/css';
+import 'element-plus/es/components/switch/style/css';
+import 'element-plus/es/components/rate/style/css';
+import 'element-plus/es/components/radio/style/css';
+import 'element-plus/es/components/radio-group/style/css';
 
 interface FieldComponentConfig {
   component: Component;

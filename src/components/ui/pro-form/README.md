@@ -6,12 +6,6 @@
 
 ```
 pro-form/
-├── field-renderers/          # 字段渲染器目录
-│   ├── base.ts               # 基础字段渲染器（input、textarea、input-number）
-│   ├── options.ts            # 选项类字段渲染器（select、cascader、checkbox、radio、transfer）
-│   ├── others.ts             # 其他字段渲染器（date、time、switch、rate等）
-│   ├── types.ts              # 渲染器类型定义
-│   └── index.ts              # 统一导出
 ├── ProForm.vue               # 主表单组件
 ├── ProFormField.vue          # 单个字段组件
 ├── useProForm.ts             # 表单级别逻辑 Hook

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import type { ProFormEmits, ProFormExpose, ProFormProps } from './types';
 
-import { VIcon } from '..';
+import { useProForm } from './hooks/useProForm';
 import ProFormField from './ProFormField.vue';
-import { useProForm } from './useProForm';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
   labelWidth: '100px',
@@ -26,11 +25,10 @@ const {
   showCollapseButton,
   currentCols,
   canActionsInSameLine,
-  optionsCache,
+  handleFieldChange,
   toggleCollapse,
   handleSubmit,
   handleReset,
-  handleFieldChange,
   getFieldRules,
   getSlotName,
   getColSpanStyle,
@@ -38,6 +36,10 @@ const {
   clearValidate,
   resetFields,
 } = useProForm({ props, emit });
+
+function updateFieldValue(key: string, value: any) {
+  internalModel.value[key] = value;
+}
 
 defineExpose<ProFormExpose>({
   validate,
@@ -47,79 +49,77 @@ defineExpose<ProFormExpose>({
 </script>
 
 <template>
-  <div class="pro-form">
-    <el-form
-      ref="formRef"
-      :model="internalModel"
-      :label-width="labelPosition === 'top' ? undefined : labelWidth"
-      :label-position="labelPosition"
-      v-bind="formProps"
+  <el-form
+    ref="formRef"
+    :model="internalModel"
+    :rules="rules"
+    :label-width="labelPosition === 'top' ? undefined : labelWidth"
+    :label-position="labelPosition"
+    v-bind="formProps"
+  >
+    <div
+      class="grid gap-4"
+      :class="{
+        'grid-cols-1': currentCols === 1,
+        'grid-cols-2': currentCols === 2,
+        'grid-cols-3': currentCols === 3,
+        'grid-cols-4': currentCols === 4,
+      }"
     >
-      <div
-        class="grid gap-4"
-        :class="{
-          'grid-cols-1': currentCols === 1,
-          'grid-cols-2': currentCols === 2,
-          'grid-cols-3': currentCols === 3,
-          'grid-cols-4': currentCols === 4,
-        }"
+      <el-form-item
+        v-for="field in displayFields"
+        :key="field.key"
+        :label="field.label"
+        :prop="field.key"
+        :rules="getFieldRules(field)"
+        :style="getColSpanStyle(field.colSpan)"
       >
-        <el-form-item
-          v-for="field in displayFields"
-          :key="field.key"
-          :label="field.label"
-          :prop="field.key"
-          :rules="getFieldRules(field)"
-          :style="getColSpanStyle(field.colSpan)"
-        >
-          <slot
-            v-if="getSlotName(field)"
-            :name="getSlotName(field)!"
-            :field="field"
-            :model="internalModel"
-            :value="internalModel[field.key]"
-            :set-value="(val: any) => { internalModel[field.key] = val }"
-            :form="formRef"
-          />
+        <slot
+          v-if="getSlotName(field)"
+          :name="getSlotName(field)"
+          :field="field"
+          :model-value="internalModel[field.key]"
+          :set-value="(val: any) => updateFieldValue(field.key, val)"
+        />
 
-          <ProFormField
-            v-else
-            :field="field"
-            :model-value="internalModel[field.key]"
-            :options-cache="optionsCache"
-            @update:model-value="internalModel[field.key] = $event"
-            @change="handleFieldChange(field.key, $event)"
-          />
-        </el-form-item>
+        <ProFormField
+          v-else
+          :field="field"
+          :model-value="internalModel[field.key]"
+          @update:model-value="updateFieldValue(field.key, $event)"
+          @change="handleFieldChange(field.key, $event)"
+        />
+      </el-form-item>
 
-        <div
-          :class="[
-            canActionsInSameLine ? 'justify-start' : 'col-span-full justify-end',
-          ]"
-          class="flex items-center gap-2"
+      <div
+        class="flex items-center gap-2"
+        :class="canActionsInSameLine ? 'justify-start' : 'col-span-full justify-end'"
+      >
+        <slot
+          name="actions"
+          :submit="handleSubmit"
+          :reset="handleReset"
+          :collapsed="collapsed"
+          :toggle="toggleCollapse"
         >
-          <slot
-            name="actions"
-            :submit="handleSubmit"
-            :reset="handleReset"
-            :collapsed="collapsed"
-            :toggle="toggleCollapse"
+          <ElButton type="primary" @click="handleSubmit">
+            {{ submitText }}
+          </ElButton>
+          <ElButton @click="handleReset">
+            {{ resetText }}
+          </ElButton>
+          <ElButton
+            v-if="showCollapseButton"
+            text
+            type="primary"
+            @click="toggleCollapse"
           >
-            <ElButton type="primary" @click="handleSubmit">
-              {{ submitText }}
-            </ElButton>
-            <ElButton @click="handleReset">
-              {{ resetText }}
-            </ElButton>
-            <ElButton v-if="showCollapseButton" text type="primary" @click="toggleCollapse">
-              {{ collapsed ? '展开' : '收起' }}
-              <VIcon :class="{ 'rotate-90': collapsed, 'rotate-270': !collapsed }" icon="weui:arrow-filled"></VIcon>
-            </ElButton>
-          </slot>
-        </div>
+            {{ collapsed ? '展开' : '收起' }}
+          </ElButton>
+        </slot>
       </div>
-    </el-form>
-  </div>
+    </div>
+  </el-form>
 </template>
 
 <style scoped lang="scss">
@@ -137,15 +137,6 @@ defineExpose<ProFormExpose>({
   :deep(.el-time-picker),
   :deep(.el-autocomplete) {
     width: 100%;
-  }
-
-  .rotate-180 {
-    transform: rotate(180deg);
-    transition: transform 0.3s;
-  }
-
-  .el-icon {
-    transition: transform 0.3s;
   }
 }
 </style>

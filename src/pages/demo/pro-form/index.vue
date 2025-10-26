@@ -1,783 +1,107 @@
 <script setup lang="ts">
-import type { ProFormField, ProFormOption } from '@/components/ui/pro-form/types';
-import { ElMessage } from 'element-plus';
+import type { ProFormField } from '@/components/ui/pro-form/types';
+
 import { computed, ref } from 'vue';
 import { ProForm } from '@/components/ui/pro-form';
 
-const formModel = ref<Record<string, any>>({
-  name: '',
-  age: undefined,
-  email: '',
-  gender: '',
-  hobbies: [],
-  status: true,
-  rating: 0,
-  color: '#409eff',
-  slider: 50,
-  date: '',
-  dateRange: [],
-  time: '',
-  region: [],
-  description: '',
-  city: '',
-  fileList: [],
-  transfer: [],
-});
+const form1 = ref<Record<string, any>>({});
+const form2 = ref<Record<string, any>>({});
+const form3 = ref<Record<string, any>>({ filter: true });
 
-const formRef = ref();
-
-const cities = [
-  { label: '北京', value: 'beijing' },
-  { label: '上海', value: 'shanghai' },
-  { label: '广州', value: 'guangzhou' },
-  { label: '深圳', value: 'shenzhen' },
-  { label: '杭州', value: 'hangzhou' },
-  { label: '成都', value: 'chengdu' },
+const staticOptions = [
+  { label: '选项1', value: 1 },
+  { label: '选项2', value: 2 },
 ];
 
-const regionOptions = [
-  {
-    label: '华东',
-    value: 'east',
-    children: [
-      { label: '上海', value: 'shanghai' },
-      { label: '江苏', value: 'jiangsu' },
-      { label: '浙江', value: 'zhejiang' },
-    ],
-  },
-  {
-    label: '华南',
-    value: 'south',
-    children: [
-      { label: '广东', value: 'guangdong' },
-      { label: '广西', value: 'guangxi' },
-      { label: '海南', value: 'hainan' },
-    ],
-  },
-  {
-    label: '华北',
-    value: 'north',
-    children: [
-      { label: '北京', value: 'beijing' },
-      { label: '天津', value: 'tianjin' },
-      { label: '河北', value: 'hebei' },
-    ],
-  },
-];
-
-const formOptions: ProFormField[] = [
-  {
-    key: 'name',
-    label: '姓名',
-    type: 'input',
-    placeholder: '请输入姓名',
-    colSpan: 1,
-    rules: [
-      { required: true, message: '请输入姓名', trigger: 'blur' },
-      { min: 2, max: 20, message: '长度在 2 到 20 个字符', trigger: 'blur' },
-    ],
-    defaultValue: '',
-  },
-  {
-    key: 'age',
-    label: '年龄',
-    type: 'input-number',
-    placeholder: '请输入年龄',
-    colSpan: 1,
-    props: {
-      min: 1,
-      max: 150,
-    },
-    rules: [{ required: true, message: '请输入年龄', trigger: 'change' }],
-  },
-  {
-    key: 'email',
-    label: '邮箱',
-    type: 'input',
-    placeholder: '请输入邮箱',
-    colSpan: 1,
-    rules: [
-      { required: true, message: '请输入邮箱', trigger: 'blur' },
-      { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' },
-    ],
-    defaultValue: '',
-  },
-  {
-    key: 'gender',
-    label: '性别',
-    type: 'radio',
-    colSpan: 1,
-    options: [
-      { label: '男', value: 'male' },
-      { label: '女', value: 'female' },
-      { label: '其他', value: 'other' },
-    ],
-    defaultValue: '',
-  },
-  {
-    key: 'city',
-    label: '城市',
-    type: 'select',
-    placeholder: '请选择城市',
-    colSpan: 1,
-    options: cities,
-    props: {
-      clearable: true,
-      filterable: true,
-    },
-    defaultValue: '',
-  },
-  {
-    key: 'region',
-    label: '地区',
-    type: 'cascader',
-    placeholder: '请选择地区',
-    colSpan: 1,
-    options: regionOptions,
-    props: {
-      multiple: true,
-    },
-    defaultValue: [],
-  },
-  {
-    key: 'hobbies',
-    label: '爱好',
-    type: 'checkbox',
-    colSpan: 2,
-    options: [
-      { label: '读书', value: 'reading' },
-      { label: '运动', value: 'sports' },
-      { label: '音乐', value: 'music' },
-      { label: '旅游', value: 'travel' },
-      { label: '游戏', value: 'gaming' },
-    ],
-    defaultValue: [],
-  },
-  {
-    key: 'date',
-    label: '日期',
-    type: 'date',
-    placeholder: '请选择日期',
-    colSpan: 1,
-    props: {
-      type: 'date',
-      valueFormat: 'YYYY-MM-DD',
-    },
-    defaultValue: '',
-  },
-  {
-    key: 'dateRange',
-    label: '日期范围',
-    type: 'daterange',
-    placeholder: '请选择日期范围',
-    colSpan: 2,
-    props: {
-      startPlaceholder: '开始日期',
-      endPlaceholder: '结束日期',
-      valueFormat: 'YYYY-MM-DD',
-    },
-    defaultValue: [],
-  },
-  {
-    key: 'time',
-    label: '时间',
-    type: 'timeselect',
-    placeholder: '请选择时间',
-    colSpan: 1,
-    props: {
-      start: '08:00',
-      end: '18:00',
-      step: '00:30',
-    },
-    defaultValue: '',
-  },
-  {
-    key: 'status',
-    label: '状态',
-    type: 'switch',
-    colSpan: 1,
-    props: {
-      activeText: '启用',
-      inactiveText: '禁用',
-    },
-    defaultValue: true,
-  },
-  {
-    key: 'rating',
-    label: '评分',
-    type: 'rate',
-    colSpan: 1,
-    props: {
-      allowHalf: true,
-      showText: true,
-    },
-    defaultValue: 0,
-  },
-  {
-    key: 'color',
-    label: '颜色',
-    type: 'color',
-    colSpan: 1,
-    props: {
-      showAlpha: true,
-    },
-    defaultValue: '#409eff',
-  },
-  {
-    key: 'slider',
-    label: '滑块',
-    type: 'slider',
-    colSpan: 2,
-    props: {
-      showStops: true,
-      step: 10,
-    },
-    defaultValue: 50,
-  },
-  {
-    key: 'transfer',
-    label: '穿梭框',
-    type: 'transfer',
-    colSpan: 4,
-    options: [
-      { label: '选项1', value: '1' },
-      { label: '选项2', value: '2' },
-      { label: '选项3', value: '3' },
-      { label: '选项4', value: '4' },
-      { label: '选项5', value: '5' },
-      { label: '选项6', value: '6' },
-    ],
-    props: {
-      titles: ['源列表', '目标列表'],
-      filterable: true,
-    },
-    defaultValue: [],
-  },
-  {
-    key: 'fileList',
-    label: '文件上传',
-    type: 'upload',
-    colSpan: 2,
-    placeholder: '点击上传',
-    props: {
-      action: '#',
-      listType: 'text',
-      limit: 3,
-    },
-    defaultValue: [],
-  },
-  {
-    key: 'description',
-    label: '描述',
-    type: 'textarea',
-    placeholder: '请输入描述',
-    colSpan: 4,
-    props: {
-      rows: 3,
-    },
-    defaultValue: '',
-  },
-];
-
-const dynamicFormOptions: ProFormField[] = [
-  {
-    key: 'showAdvanced',
-    label: '显示高级选项',
-    type: 'switch',
-    colSpan: 1,
-    defaultValue: false,
-  },
-  {
-    key: 'advancedOption1',
-    label: '高级选项1',
-    type: 'input',
-    placeholder: '请输入',
-    colSpan: 1,
-    visible: ({ model }) => model.showAdvanced === true,
-    defaultValue: '',
-  },
-  {
-    key: 'advancedOption2',
-    label: '高级选项2',
-    type: 'input',
-    placeholder: '请输入',
-    colSpan: 1,
-    visible: ({ model }) => model.showAdvanced === true,
-    defaultValue: '',
-  },
-];
-
-const slotFormOptions: ProFormField[] = [
-  {
-    key: 'username',
-    label: '用户名',
-    type: 'input',
-    placeholder: '请输入用户名',
-    colSpan: 1,
-    slot: true,
-    defaultValue: '',
-  },
-  {
-    key: 'password',
-    label: '密码',
-    type: 'input',
-    placeholder: '请输入密码',
-    colSpan: 1,
-    defaultValue: '',
-  },
-];
-
-function handleSubmit(values: Record<string, any>) {
-  console.log('表单提交:', values);
-  ElMessage.success('提交成功');
-}
-
-function handleReset() {
-  console.log('表单重置');
-  ElMessage.info('表单已重置');
-}
-
-function handleChange(key: string, value: any, model: Record<string, any>) {
-  console.log('字段变化:', { key, value, model });
-}
-
-function handleToggle(collapsed: boolean) {
-  console.log('折叠状态变化:', collapsed);
-}
-
-async function validateForm() {
-  try {
-    await formRef.value?.validate();
-    ElMessage.success('校验通过');
-  }
-  catch {
-    ElMessage.error('校验失败');
-  }
-}
-
-function clearValidation() {
-  formRef.value?.clearValidate();
-  ElMessage.info('已清除校验');
-}
-
-function resetForm() {
-  formRef.value?.resetFields();
-  ElMessage.info('已重置表单');
-}
-
-const queryParams = ref<Record<string, any>>({});
-const autocompleteModel = ref<Record<string, any>>({ autocomplete: '' });
-
-function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void) {
-  const results = queryString
-    ? cities.filter(city => city.label.toLowerCase().includes(queryString.toLowerCase()))
-    : cities;
-  cb(results.map(city => ({ value: city.label })));
-}
-
-const dynamicFormModel = ref<Record<string, any>>({
-  status: 1,
-  category: '',
-  filtered: '',
-  dynamic: '',
-});
-
-const categoryOptions = ref([
-  { label: '分类A', value: 'a' },
-  { label: '分类B', value: 'b' },
-  { label: '分类C', value: 'c' },
+const refOptions = ref([
+  { label: 'Ref A', value: 'a' },
+  { label: 'Ref B', value: 'b' },
 ]);
 
-const filteredOptions = computed(() => {
-  return [
-    { label: '选项1', value: 1 },
-    { label: '选项2', value: 2 },
-    { label: '选项3', value: 3 },
-  ].filter(_o => dynamicFormModel.value.status !== 0);
+const computedOptions = computed(() => {
+  return form3.value.filter
+    ? [{ label: 'Computed 1', value: 1 }]
+    : [
+        { label: 'Computed 1', value: 1 },
+        { label: 'Computed 2', value: 2 },
+      ];
 });
 
-function dynamicOptionsFunc() {
+function funcOptions() {
   return [
-    { label: '动态A', value: 'da' },
-    { label: '动态B', value: 'db' },
-    { label: '动态C', value: 'dc' },
+    { label: 'Func X', value: 'x' },
+    { label: 'Func Y', value: 'y' },
   ];
 }
 
-const dynamicOptionsFormFields: ProFormField[] = [
-  {
-    key: 'status',
-    label: '状态',
-    type: 'select',
-    options: [
-      { label: '启用', value: 1 },
-      { label: '禁用', value: 0 },
-    ],
-    colSpan: 1,
-    defaultValue: 1,
-  },
-  {
-    key: 'category',
-    label: '分类 (ref)',
-    type: 'select',
-    options: categoryOptions,
-    colSpan: 1,
-    defaultValue: '',
-  },
-  {
-    key: 'filtered',
-    label: '筛选项 (computed)',
-    type: 'select',
-    options: filteredOptions,
-    colSpan: 1,
-    defaultValue: '',
-  },
-  {
-    key: 'dynamic',
-    label: '动态选项 (函数)',
-    type: 'select',
-    options: dynamicOptionsFunc,
-    colSpan: 1,
-    defaultValue: '',
-  },
+const formOptions1: ProFormField[] = [
+  { key: 'name', label: '名称', type: 'input' },
+  { key: 'age', label: '年龄', type: 'input-number' },
 ];
 
-const topLabelFormModel = ref<Record<string, any>>({
-  name: '',
-  email: '',
-  city: '',
-  gender: '',
-});
+const formOptions2: ProFormField[] = [
+  { key: 'f1', label: '字段1', type: 'input' },
+  { key: 'f2', label: '字段2', type: 'input' },
+  { key: 'f3', label: '字段3', type: 'input' },
+  { key: 'f4', label: '字段4', type: 'input' },
+  { key: 'f5', label: '字段5', type: 'input' },
+  { key: 'f6', label: '字段6', type: 'input' },
+];
 
-async function fetchAsyncOptions(): Promise<ProFormOption[]> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        { label: '异步选项1', value: 'async1' },
-        { label: '异步选项2', value: 'async2' },
-        { label: '异步选项3', value: 'async3' },
-      ]);
-    }, 1000);
-  });
+const formOptions3: ProFormField[] = [
+  { key: 'static', label: '静态', type: 'select', options: staticOptions },
+  { key: 'ref', label: 'Ref', type: 'select', options: refOptions },
+  { key: 'computed', label: 'Computed', type: 'select', options: computedOptions },
+  { key: 'func', label: '函数', type: 'select', options: funcOptions },
+  { key: 'filter', label: '过滤开关', type: 'switch', defaultValue: true },
+];
+
+function updateRefOptions() {
+  refOptions.value = [
+    { label: 'Ref C', value: 'c' },
+    { label: 'Ref D', value: 'd' },
+  ];
 }
 
-const asyncOptionsFormModel = ref<Record<string, any>>({
-  asyncSelect: '',
-});
+function toggleFilter() {
+  form3.value.filter = !form3.value.filter;
+}
 
-const asyncOptionsFields: ProFormField[] = [
-  {
-    key: 'asyncSelect',
-    label: '异步选项 (Promise)',
-    type: 'select',
-    options: fetchAsyncOptions,
-    colSpan: 1,
-    defaultValue: '',
-  },
-];
+function handleSubmit(values: Record<string, any>) {
+  console.log('Submit:', values);
+}
 </script>
 
 <template>
-  <div class="demo-pro-form">
-    <el-card class="demo-card">
-      <template #header>
-        <div class="card-header">
-          <span>ProForm 组件示例</span>
-        </div>
-      </template>
+  <div class="p-4 space-y-6">
+    <h2>1. Label 在上方</h2>
+    <ProForm
+      v-model="form1"
+      :options="formOptions1"
+      label-position="top"
+      @submit="handleSubmit"
+    />
 
-      <!-- 基础表单 -->
-      <div class="demo-section">
-        <h3>基础表单</h3>
-        <ProForm
-          ref="formRef"
-          v-model="formModel"
-          :options="formOptions"
-          :default-collapsed="true"
-          @submit="handleSubmit"
-          @reset="handleReset"
-          @change="handleChange"
-          @toggle="handleToggle"
-        />
-        <div class="mt-4 flex gap-2">
-          <el-button @click="validateForm">
-            手动校验
-          </el-button>
-          <el-button @click="clearValidation">
-            清除校验
-          </el-button>
-          <el-button @click="resetForm">
-            重置表单
-          </el-button>
-        </div>
-        <div class="mt-4">
-          <el-text tag="b">
-            当前表单值：
-          </el-text>
-          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(formModel, null, 2) }}</pre>
-        </div>
-      </div>
+    <h2>2. 响应式布局（尝试缩放浏览器）</h2>
+    <ProForm
+      v-model="form2"
+      :options="formOptions2"
+      @submit="handleSubmit"
+    />
 
-      <!-- 动态显隐 -->
-      <div class="demo-section">
-        <h3>动态显隐</h3>
-        <ProForm
-          v-model="queryParams"
-          :options="dynamicFormOptions"
-          :show-collapse="false"
-          submit-text="查询"
-          @submit="handleSubmit"
-        />
-        <div class="mt-4">
-          <el-text tag="b">
-            当前表单值：
-          </el-text>
-          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(queryParams, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <!-- 自定义插槽 -->
-      <div class="demo-section">
-        <h3>自定义插槽</h3>
-        <ProForm
-          v-model="queryParams"
-          :options="slotFormOptions"
-          :show-collapse="false"
-        >
-          <template #field-username="{ model }">
-            <div class="flex items-center gap-2">
-              <el-input v-model="model.username" placeholder="自定义插槽" />
-              <el-tooltip content="用户名必须唯一">
-                <el-icon>
-                  <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="currentColor" d="M512 64a448 448 0 1 1 0 896 448 448 0 0 1 0-896zm0 832a384 384 0 1 0 0-768 384 384 0 0 0 0 768zm48-176a48 48 0 1 1-96 0 48 48 0 0 1 96 0zm-48-464a32 32 0 0 1 32 32v288a32 32 0 0 1-64 0V288a32 32 0 0 1 32-32z" />
-                  </svg>
-                </el-icon>
-              </el-tooltip>
-            </div>
-          </template>
-
-          <template #actions="{ collapsed, toggle }">
-            <el-button type="primary">
-              自定义提交
-            </el-button>
-            <el-button>自定义重置</el-button>
-            <el-button v-if="collapsed !== undefined" @click="toggle">
-              {{ collapsed ? '展开' : '收起' }}
-            </el-button>
-          </template>
-        </ProForm>
-      </div>
-
-      <!-- Autocomplete 示例 -->
-      <div class="demo-section">
-        <h3>自动完成</h3>
-        <ProForm
-          v-model="autocompleteModel"
-          :options="[
-            {
-              key: 'autocomplete',
-              label: '城市搜索',
-              type: 'autocomplete',
-              placeholder: '输入城市名称',
-              colSpan: 2,
-              props: {
-                fetchSuggestions,
-              },
-              defaultValue: '',
-            },
-          ]"
-          :show-collapse="false"
-        />
-      </div>
-
-      <!-- 无折叠按钮 -->
-      <div class="demo-section">
-        <h3>无折叠按钮</h3>
-        <ProForm
-          v-model="queryParams"
-          :options="[
-            {
-              key: 'keyword',
-              label: '关键词',
-              type: 'input',
-              placeholder: '请输入关键词',
-              colSpan: 2,
-              defaultValue: '',
-            },
-            {
-              key: 'status',
-              label: '状态',
-              type: 'select',
-              placeholder: '请选择状态',
-              colSpan: 1,
-              options: [
-                { label: '全部', value: '' },
-                { label: '启用', value: '1' },
-                { label: '禁用', value: '0' },
-              ],
-              defaultValue: '',
-            },
-          ]"
-          :show-collapse="false"
-          submit-text="搜索"
-        />
-      </div>
-
-      <!-- Label 在上方 -->
-      <div class="demo-section">
-        <h3>Label 在上方</h3>
-        <ProForm
-          v-model="topLabelFormModel"
-          label-position="top"
-          :options="[
-            {
-              key: 'name',
-              label: '姓名',
-              type: 'input',
-              placeholder: '请输入姓名',
-              colSpan: 1,
-              defaultValue: '',
-            },
-            {
-              key: 'email',
-              label: '邮箱',
-              type: 'input',
-              placeholder: '请输入邮箱',
-              colSpan: 1,
-              defaultValue: '',
-            },
-            {
-              key: 'city',
-              label: '城市',
-              type: 'select',
-              placeholder: '请选择城市',
-              colSpan: 1,
-              options: cities,
-              defaultValue: '',
-            },
-            {
-              key: 'gender',
-              label: '性别',
-              type: 'radio',
-              colSpan: 1,
-              options: [
-                { label: '男', value: 'male' },
-                { label: '女', value: 'female' },
-              ],
-              defaultValue: '',
-            },
-          ]"
-          :show-collapse="false"
-        />
-        <div class="mt-4">
-          <el-text tag="b">
-            当前表单值：
-          </el-text>
-          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(topLabelFormModel, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <!-- 动态 options 示例 -->
-      <div class="demo-section">
-        <h3>动态 Options（支持数组、ref、computed、函数、异步函数）</h3>
-        <p class="mb-4 text-sm text-gray-600">
-          当状态为"禁用"时，"筛选项"会自动更新（演示 computed 响应式）
-        </p>
-        <ProForm
-          v-model="dynamicFormModel"
-          :options="dynamicOptionsFormFields"
-          :show-collapse="false"
-          submit-text="查询"
-        />
-        <div class="mt-4">
-          <el-text tag="b">
-            当前表单值：
-          </el-text>
-          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(dynamicFormModel, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <!-- 异步 options 示例 -->
-      <div class="demo-section">
-        <h3>异步加载 Options</h3>
-        <p class="mb-4 text-sm text-gray-600">
-          支持通过返回 Promise 的函数异步加载选项数据（模拟 1 秒延迟）
-        </p>
-        <ProForm
-          v-model="asyncOptionsFormModel"
-          :options="asyncOptionsFields"
-          :show-collapse="false"
-          submit-text="提交"
-        />
-        <div class="mt-4">
-          <el-text tag="b">
-            当前表单值：
-          </el-text>
-          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(asyncOptionsFormModel, null, 2) }}</pre>
-        </div>
-      </div>
-
-      <!-- 响应式布局说明 -->
-      <div class="demo-section">
-        <h3>智能响应式布局</h3>
-        <div class="mb-4 p-4 bg-blue-50 rounded">
-          <p class="text-sm text-gray-700 mb-2">
-            <strong>布局规则：</strong>
-          </p>
-          <ul class="text-sm text-gray-600 space-y-1 ml-4">
-            <li>• 屏幕宽度 &gt;= 1280px：显示 4 列</li>
-            <li>• 屏幕宽度 1024px-1279px：显示 3 列</li>
-            <li>• 屏幕宽度 768px-1023px：显示 2 列</li>
-            <li>• 屏幕宽度 &lt; 768px：显示 1 列</li>
-            <li>• 收起状态：只展示第一行表单项，按钮根据剩余空间智能换行</li>
-            <li>• 展开状态：显示所有表单项，按钮区独占一行并右对齐</li>
-          </ul>
-          <p class="text-sm text-gray-500 mt-2">
-            提示：调整浏览器窗口宽度可以看到布局实时响应变化
-          </p>
-        </div>
-      </div>
-    </el-card>
+    <h2>3. 动态 Options</h2>
+    <ProForm
+      v-model="form3"
+      :options="formOptions3"
+      @submit="handleSubmit"
+    />
+    <div class="flex gap-2">
+      <ElButton @click="updateRefOptions">
+        更新 Ref Options
+      </ElButton>
+      <ElButton @click="toggleFilter">
+        切换过滤条件
+      </ElButton>
+    </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-.demo-pro-form {
-  padding: 20px;
-
-  .demo-card {
-    margin-bottom: 20px;
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 600;
-    }
-  }
-
-  .demo-section {
-    margin-bottom: 40px;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-
-    h3 {
-      margin-bottom: 16px;
-      color: #303133;
-      font-size: 16px;
-      font-weight: 600;
-    }
-
-    pre {
-      font-size: 12px;
-      line-height: 1.5;
-      max-height: 400px;
-      overflow: auto;
-    }
-  }
-}
-</style>

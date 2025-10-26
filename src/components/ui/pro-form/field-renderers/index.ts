@@ -1,4 +1,2 @@
-export * from './base';
-export * from './options';
-export * from './others';
-export * from './types';
+// Deprecated compatibility layer. Please use the new utils/fieldResolver.ts exports.
+export {};

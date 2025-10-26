@@ -107,7 +107,7 @@ const formOptions: ProFormField[] = [
     label: '性别',
     type: 'radio',
     colSpan: 1,
-    choices: [
+    options: [
       { label: '男', value: 'male' },
       { label: '女', value: 'female' },
       { label: '其他', value: 'other' },
@@ -120,7 +120,7 @@ const formOptions: ProFormField[] = [
     type: 'select',
     placeholder: '请选择城市',
     colSpan: 1,
-    choices: cities,
+    options: cities,
     props: {
       clearable: true,
       filterable: true,
@@ -133,9 +133,9 @@ const formOptions: ProFormField[] = [
     type: 'cascader',
     placeholder: '请选择地区',
     colSpan: 1,
-    choices: regionOptions,
+    options: regionOptions,
     props: {
-      clearable: true,
+      multiple: true,
     },
     defaultValue: [],
   },
@@ -144,7 +144,7 @@ const formOptions: ProFormField[] = [
     label: '爱好',
     type: 'checkbox',
     colSpan: 2,
-    choices: [
+    options: [
       { label: '读书', value: 'reading' },
       { label: '运动', value: 'sports' },
       { label: '音乐', value: 'music' },
@@ -239,7 +239,7 @@ const formOptions: ProFormField[] = [
     label: '穿梭框',
     type: 'transfer',
     colSpan: 4,
-    choices: [
+    options: [
       { label: '选项1', value: '1' },
       { label: '选项2', value: '2' },
       { label: '选项3', value: '3' },
@@ -392,7 +392,6 @@ function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void)
           ref="formRef"
           v-model="formModel"
           :options="formOptions"
-          :collapse-to-rows="2"
           :default-collapsed="true"
           @submit="handleSubmit"
           @reset="handleReset"
@@ -511,7 +510,7 @@ function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void)
               type: 'select',
               placeholder: '请选择状态',
               colSpan: 1,
-              choices: [
+              options: [
                 { label: '全部', value: '' },
                 { label: '启用', value: '1' },
                 { label: '禁用', value: '0' },

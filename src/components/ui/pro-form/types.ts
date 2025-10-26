@@ -18,6 +18,7 @@ import type {
   TransferProps,
   UploadProps,
 } from 'element-plus';
+import type { Ref } from 'vue';
 
 export interface ProFormOption {
   label: string;
@@ -32,7 +33,7 @@ interface ProFormFieldBase {
   label: string;
   placeholder?: string;
   colSpan?: number;
-  choices?: ProFormOption[];
+
   rules?: FormItemRule[];
   visible?: boolean | ((ctx: { model: Record<string, any> }) => boolean);
   slot?: string | boolean;
@@ -56,11 +57,13 @@ export type InputNumberField = ProFormFieldBase & {
 
 export type SelectField = ProFormFieldBase & {
   type: 'select';
+  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
   props?: Partial<SelectProps>;
 };
 
 export type CascaderField = ProFormFieldBase & {
   type: 'cascader';
+  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
   props?: Partial<CascaderProps>;
 };
 
@@ -91,11 +94,13 @@ export type SwitchField = ProFormFieldBase & {
 
 export type CheckboxField = ProFormFieldBase & {
   type: 'checkbox';
+  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
   props?: Partial<CheckboxGroupProps>;
 };
 
 export type RadioField = ProFormFieldBase & {
   type: 'radio';
+  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
   props?: Partial<RadioGroupProps>;
 };
 
@@ -116,6 +121,7 @@ export type SliderField = ProFormFieldBase & {
 
 export type TransferField = ProFormFieldBase & {
   type: 'transfer';
+  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
   props?: Partial<TransferProps>;
 };
 
@@ -129,7 +135,25 @@ export type AutocompleteField = ProFormFieldBase & {
   props?: Partial<AutocompleteProps>;
 };
 
-export type ProFormField = InputField | TextareaField | InputNumberField | SelectField | CascaderField | DateField | DateRangeField | TimeField | TimeSelectField | SwitchField | CheckboxField | RadioField | RateField | ColorField | SliderField | TransferField | UploadField | AutocompleteField;
+export type ProFormField
+  = | InputField
+    | TextareaField
+    | InputNumberField
+    | SelectField
+    | CascaderField
+    | DateField
+    | DateRangeField
+    | TimeField
+    | TimeSelectField
+    | SwitchField
+    | CheckboxField
+    | RadioField
+    | RateField
+    | ColorField
+    | SliderField
+    | TransferField
+    | UploadField
+    | AutocompleteField;
 
 export interface ProFormProps {
   modelValue: Record<string, any>;

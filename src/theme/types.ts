@@ -12,8 +12,20 @@ export type ThemeConfig = {
     danger: string;
   };
   colors: {
-    '--color-primary': string;
+    /** 文字 */
+    '--el-text-color-primary': string;
+    '--el-text-color-regular': string;
+    '--el-text-color-secondary': string;
+    '--el-text-color-placeholder': string;
+    '--el-text-color-disabled': string;
+    /** 线条 */
+    '--el-border-color': string;
+    '--el-border-color-light': string;
+    '--el-border-color-lighter': string;
+    '--el-border-color-extra-light': string;
+    '--el-border-color-dark': string;
+    '--el-border-color-darker': string;
   };
 };
 
-export type ThemeKey = 'default'
+export type ThemeKey = 'default';

@@ -8,6 +8,8 @@ const __dirname = import.meta.dirname;
  */
 const iconifyIcon = [
   'tabler:error-404',
+  'weui:arrow-filled',
+  'weui:arrow-outlined',
 ];
 
 async function loadIconifyIcon() {

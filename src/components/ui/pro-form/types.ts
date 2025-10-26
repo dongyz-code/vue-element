@@ -32,7 +32,8 @@ export type ProFormOptions
   = | ProFormOption[]
     | Ref<ProFormOption[]>
     | ComputedRef<ProFormOption[]>
-    | (() => ProFormOption[]);
+    | (() => ProFormOption[])
+    | (() => Promise<ProFormOption[]>);
 
 interface ProFormFieldBase {
   key: string;

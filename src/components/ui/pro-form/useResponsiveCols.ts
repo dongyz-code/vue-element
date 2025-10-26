@@ -20,12 +20,15 @@ export function useResponsiveCols() {
   });
 
   const currentCols = computed(() => {
-    if (width.value >= 1280)
+    if (width.value >= 1280) {
       return 4;
-    if (width.value >= 1024)
+    }
+    if (width.value >= 1024) {
       return 3;
-    if (width.value >= 768)
+    }
+    if (width.value >= 768) {
       return 2;
+    }
     return 1;
   });
 

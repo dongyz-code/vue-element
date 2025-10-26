@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ProFormField } from '@/components/ui/pro-form/types';
+import type { ProFormField, ProFormOption } from '@/components/ui/pro-form/types';
 import { ElMessage } from 'element-plus';
 import { computed, ref } from 'vue';
 import { ProForm } from '@/components/ui/pro-form';
@@ -448,6 +448,33 @@ const topLabelFormModel = ref<Record<string, any>>({
   city: '',
   gender: '',
 });
+
+async function fetchAsyncOptions(): Promise<ProFormOption[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { label: '异步选项1', value: 'async1' },
+        { label: '异步选项2', value: 'async2' },
+        { label: '异步选项3', value: 'async3' },
+      ]);
+    }, 1000);
+  });
+}
+
+const asyncOptionsFormModel = ref<Record<string, any>>({
+  asyncSelect: '',
+});
+
+const asyncOptionsFields: ProFormField[] = [
+  {
+    key: 'asyncSelect',
+    label: '异步选项 (Promise)',
+    type: 'select',
+    options: fetchAsyncOptions,
+    colSpan: 1,
+    defaultValue: '',
+  },
+];
 </script>
 
 <template>
@@ -653,7 +680,7 @@ const topLabelFormModel = ref<Record<string, any>>({
 
       <!-- 动态 options 示例 -->
       <div class="demo-section">
-        <h3>动态 Options（支持数组、ref、computed、函数）</h3>
+        <h3>动态 Options（支持数组、ref、computed、函数、异步函数）</h3>
         <p class="mb-4 text-sm text-gray-600">
           当状态为"禁用"时，"筛选项"会自动更新（演示 computed 响应式）
         </p>
@@ -668,6 +695,26 @@ const topLabelFormModel = ref<Record<string, any>>({
             当前表单值：
           </el-text>
           <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(dynamicFormModel, null, 2) }}</pre>
+        </div>
+      </div>
+
+      <!-- 异步 options 示例 -->
+      <div class="demo-section">
+        <h3>异步加载 Options</h3>
+        <p class="mb-4 text-sm text-gray-600">
+          支持通过返回 Promise 的函数异步加载选项数据（模拟 1 秒延迟）
+        </p>
+        <ProForm
+          v-model="asyncOptionsFormModel"
+          :options="asyncOptionsFields"
+          :show-collapse="false"
+          submit-text="提交"
+        />
+        <div class="mt-4">
+          <el-text tag="b">
+            当前表单值：
+          </el-text>
+          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(asyncOptionsFormModel, null, 2) }}</pre>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import type { FormInstance } from 'element-plus';
 import type { Component, EmitFn, VNode } from 'vue';
-import type { ProFormEmits, ProFormField, ProFormOptions, ProFormProps } from './types';
+import type { ProFormEmits, ProFormField, ProFormOption, ProFormOptions, ProFormProps } from './types';
 
 import {
   ElAutocomplete,
@@ -64,6 +64,9 @@ export function useProForm({ props, emit }: ProFormHookProps) {
 
   const { currentCols } = useResponsiveCols();
 
+  const optionsCache = ref<Map<string, ProFormOption[]>>(new Map());
+  const loadingOptions = ref<Set<string>>(new Set());
+
   const internalModel = computed({
     get: () => props.modelValue,
     set: (value) => {
@@ -83,9 +86,42 @@ export function useProForm({ props, emit }: ProFormHookProps) {
     });
   });
 
+  async function loadFieldOptions(fieldKey: string, options: ProFormOptions) {
+    if (loadingOptions.value.has(fieldKey) || optionsCache.value.has(fieldKey)) {
+      return;
+    }
+
+    if (typeof options === 'function') {
+      loadingOptions.value.add(fieldKey);
+      try {
+        const result = options();
+        if (result instanceof Promise) {
+          const resolved = await result;
+          const normalizedResult = Array.isArray(resolved) ? resolved : [];
+          optionsCache.value.set(fieldKey, normalizedResult);
+        }
+        else {
+          const normalizedResult = Array.isArray(result) ? result : [];
+          optionsCache.value.set(fieldKey, normalizedResult);
+        }
+      }
+      finally {
+        loadingOptions.value.delete(fieldKey);
+      }
+    }
+  }
+
+  for (const field of props.options) {
+    const hasOptions = 'options' in field && field.options;
+    if (hasOptions) {
+      loadFieldOptions(field.key, field.options as ProFormOptions);
+    }
+  }
+
   const needCollapse = computed(() => {
-    if (!props.showCollapse)
+    if (!props.showCollapse) {
       return false;
+    }
     let totalSpan = 0;
     for (const field of visibleFields.value) {
       totalSpan += field.colSpan || 1;
@@ -125,8 +161,9 @@ export function useProForm({ props, emit }: ProFormHookProps) {
   });
 
   const canActionsInSameLine = computed(() => {
-    if (!collapsed.value)
+    if (!collapsed.value) {
       return false;
+    }
 
     const actionsSpan = 1;
     const usedInLastRow = displayFieldsSpan.value % currentCols.value || currentCols.value;
@@ -188,17 +225,22 @@ export function useProForm({ props, emit }: ProFormHookProps) {
     };
   }
 
-  function normalizeOptions(options?: ProFormOptions) {
-    if (!options)
+  function normalizeOptions(fieldKey: string, options?: ProFormOptions): ProFormOption[] {
+    if (!options) {
       return [];
-
-    if (typeof options === 'function') {
-      const result = options();
-      return Array.isArray(result) ? result : [];
     }
 
-    if (isRef(options))
+    if (typeof options === 'function') {
+      const cached = optionsCache.value.get(fieldKey);
+      if (cached) {
+        return cached;
+      }
+      return [];
+    }
+
+    if (isRef(options)) {
       return unref(options) || [];
+    }
 
     return options;
   }
@@ -237,7 +279,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
         };
 
       case 'select': {
-        const normalizedOptions = normalizeOptions(field.options);
+        const normalizedOptions = normalizeOptions(field.key, field.options);
         return {
           component: ElSelect,
           props: baseProps,
@@ -253,7 +295,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       }
 
       case 'cascader': {
-        const normalizedOptions = normalizeOptions(field.options);
+        const normalizedOptions = normalizeOptions(field.key, field.options);
         return {
           component: ElCascader,
           props: {
@@ -304,7 +346,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
         };
 
       case 'checkbox': {
-        const normalizedOptions = normalizeOptions(field.options);
+        const normalizedOptions = normalizeOptions(field.key, field.options);
         return {
           component: ElCheckboxGroup,
           props: {
@@ -326,7 +368,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       }
 
       case 'radio': {
-        const normalizedOptions = normalizeOptions(field.options);
+        const normalizedOptions = normalizeOptions(field.key, field.options);
         return {
           component: ElRadioGroup,
           props: {
@@ -387,7 +429,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
         };
 
       case 'transfer': {
-        const normalizedOptions = normalizeOptions(field.options);
+        const normalizedOptions = normalizeOptions(field.key, field.options);
         return {
           component: ElTransfer,
           props: {

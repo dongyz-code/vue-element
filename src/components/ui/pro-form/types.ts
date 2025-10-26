@@ -18,7 +18,7 @@ import type {
   TransferProps,
   UploadProps,
 } from 'element-plus';
-import type { Ref } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 
 export interface ProFormOption {
   label: string;
@@ -27,6 +27,13 @@ export interface ProFormOption {
   children?: ProFormOption[];
   [key: string]: any;
 }
+
+export type ProFormOptions
+  = | ProFormOption[]
+    | Ref<ProFormOption[]>
+    | ComputedRef<ProFormOption[]>
+    | (() => ProFormOption[])
+    | (() => Promise<ProFormOption[]>);
 
 interface ProFormFieldBase {
   key: string;
@@ -57,13 +64,13 @@ export type InputNumberField = ProFormFieldBase & {
 
 export type SelectField = ProFormFieldBase & {
   type: 'select';
-  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
+  options: ProFormOptions;
   props?: Partial<SelectProps>;
 };
 
 export type CascaderField = ProFormFieldBase & {
   type: 'cascader';
-  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
+  options: ProFormOptions;
   props?: Partial<CascaderProps>;
 };
 
@@ -94,13 +101,13 @@ export type SwitchField = ProFormFieldBase & {
 
 export type CheckboxField = ProFormFieldBase & {
   type: 'checkbox';
-  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
+  options: ProFormOptions;
   props?: Partial<CheckboxGroupProps>;
 };
 
 export type RadioField = ProFormFieldBase & {
   type: 'radio';
-  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
+  options: ProFormOptions;
   props?: Partial<RadioGroupProps>;
 };
 
@@ -121,7 +128,7 @@ export type SliderField = ProFormFieldBase & {
 
 export type TransferField = ProFormFieldBase & {
   type: 'transfer';
-  options: ProFormOption[] | Ref<ProFormOption[]> | (() => Promise<ProFormOption[]>);
+  options: ProFormOptions;
   props?: Partial<TransferProps>;
 };
 
@@ -160,6 +167,7 @@ export interface ProFormProps {
   options: ProFormField[];
   rules?: FormRules;
   labelWidth?: string | number;
+  labelPosition?: 'left' | 'top';
   collapseToRows?: number;
   defaultCollapsed?: boolean;
   showCollapse?: boolean;

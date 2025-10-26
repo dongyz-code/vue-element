@@ -1,56 +1,9 @@
 import type { FormInstance } from 'element-plus';
-import type { Component, EmitFn, VNode } from 'vue';
-import type { ProFormEmits, ProFormExpose, ProFormField, ProFormProps } from './types';
+import type { EmitFn } from 'vue';
+import type { ProFormEmits, ProFormField, ProFormOption, ProFormProps } from './types';
 
-import {
-  ElAutocomplete,
-  ElButton,
-  ElCascader,
-  ElCheckbox,
-  ElCheckboxGroup,
-  ElColorPicker,
-  ElDatePicker,
-  ElInput,
-  ElInputNumber,
-  ElOption,
-  ElRadio,
-  ElRadioGroup,
-  ElRate,
-  ElSelect,
-  ElSlider,
-  ElSwitch,
-  ElTimePicker,
-  ElTimeSelect,
-  ElTransfer,
-  ElUpload,
-} from 'element-plus';
-import { computed, h, ref } from 'vue';
-
-import 'element-plus/es/components/autocomplete/style/css';
-import 'element-plus/es/components/button/style/css';
-import 'element-plus/es/components/cascader/style/css';
-import 'element-plus/es/components/checkbox/style/css';
-import 'element-plus/es/components/checkbox-group/style/css';
-import 'element-plus/es/components/color-picker/style/css';
-import 'element-plus/es/components/date-picker/style/css';
-import 'element-plus/es/components/input/style/css';
-import 'element-plus/es/components/input-number/style/css';
-import 'element-plus/es/components/time-picker/style/css';
-import 'element-plus/es/components/time-select/style/css';
-import 'element-plus/es/components/transfer/style/css';
-import 'element-plus/es/components/upload/style/css';
-import 'element-plus/es/components/select/style/css';
-import 'element-plus/es/components/slider/style/css';
-import 'element-plus/es/components/switch/style/css';
-import 'element-plus/es/components/rate/style/css';
-import 'element-plus/es/components/radio/style/css';
-import 'element-plus/es/components/radio-group/style/css';
-
-type FieldRenderConfig = {
-  component: Component;
-  props: Record<string, any>;
-  children?: VNode | VNode[];
-};
+import { computed, ref } from 'vue';
+import { useResponsiveCols } from './useResponsiveCols';
 
 type ProFormHookProps = {
   props: ProFormProps;
@@ -60,6 +13,10 @@ type ProFormHookProps = {
 export function useProForm({ props, emit }: ProFormHookProps) {
   const formRef = ref<FormInstance>();
   const collapsed = ref(props.defaultCollapsed);
+
+  const { currentCols } = useResponsiveCols();
+
+  const optionsCache = ref<Map<string, ProFormOption[]>>(new Map());
 
   const internalModel = computed({
     get: () => props.modelValue,
@@ -81,8 +38,9 @@ export function useProForm({ props, emit }: ProFormHookProps) {
   });
 
   const needCollapse = computed(() => {
-    if (!props.showCollapse)
+    if (!props.showCollapse) {
       return false;
+    }
     let totalSpan = 0;
     for (const field of visibleFields.value) {
       totalSpan += field.colSpan || 1;
@@ -95,13 +53,13 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       return visibleFields.value;
     }
 
-    const maxSpan = (props.collapseToRows! - 1) * 4 + 3;
+    const maxColsInFirstRow = currentCols.value;
     let currentSpan = 0;
     const result: ProFormField[] = [];
 
     for (const field of visibleFields.value) {
-      const fieldSpan = field.colSpan || 1;
-      if (currentSpan + fieldSpan <= maxSpan) {
+      const fieldSpan = Math.min(field.colSpan || 1, maxColsInFirstRow);
+      if (currentSpan + fieldSpan <= maxColsInFirstRow) {
         result.push(field);
         currentSpan += fieldSpan;
       }
@@ -114,6 +72,23 @@ export function useProForm({ props, emit }: ProFormHookProps) {
   });
 
   const showCollapseButton = computed(() => needCollapse.value && props.showCollapse);
+
+  const displayFieldsSpan = computed(() => {
+    return displayFields.value.reduce((sum, field) => {
+      return sum + Math.min(field.colSpan || 1, currentCols.value);
+    }, 0);
+  });
+
+  const canActionsInSameLine = computed(() => {
+    if (!collapsed.value) {
+      return false;
+    }
+
+    const actionsSpan = 1;
+    const usedInLastRow = displayFieldsSpan.value % currentCols.value || currentCols.value;
+
+    return usedInLastRow + actionsSpan <= currentCols.value;
+  });
 
   function handleFieldChange(key: string, value: any) {
     emit('change', key, value, internalModel.value);
@@ -163,232 +138,10 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       return {};
     }
 
+    const actualSpan = Math.min(colSpan, currentCols.value);
     return {
-      gridColumn: `span ${Math.min(colSpan, 4)} / span ${Math.min(colSpan, 4)}`,
+      gridColumn: `span ${actualSpan} / span ${actualSpan}`,
     };
-  }
-
-  /**
-   * 最终渲染的表单项
-   */
-  function resolveFieldComponent(field: ProFormField): FieldRenderConfig {
-    const baseProps = {
-      'modelValue': internalModel.value[field.key],
-      'onUpdate:modelValue': (val: any) => {
-        internalModel.value[field.key] = val;
-      },
-      'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-      'placeholder': field.placeholder,
-      ...field.props,
-    };
-
-    switch (field.type) {
-      case 'input':
-        return {
-          component: ElInput,
-          props: baseProps,
-        };
-
-      case 'textarea':
-        return {
-          component: ElInput,
-          props: { ...baseProps, type: 'textarea' },
-        };
-
-      case 'input-number':
-        return {
-          component: ElInputNumber,
-          props: baseProps,
-        };
-
-      case 'select':
-        return {
-          component: ElSelect,
-          props: baseProps,
-          children: field.options?.map(option =>
-            h(ElOption, {
-              key: option.value,
-              label: option.label,
-              value: option.value,
-              disabled: option.disabled,
-            }),
-          ),
-        };
-
-      case 'cascader':
-        return {
-          component: ElCascader,
-          props: {
-            ...baseProps,
-            options: field.options,
-          },
-        };
-
-      case 'date':
-        return {
-          component: ElDatePicker,
-          props: baseProps,
-        };
-
-      case 'daterange':
-        return {
-          component: ElDatePicker,
-          props: {
-            ...baseProps,
-            type: 'daterange',
-          },
-        };
-
-      case 'time':
-        return {
-          component: ElTimePicker,
-          props: baseProps,
-        };
-
-      case 'timeselect':
-        return {
-          component: ElTimeSelect,
-          props: baseProps,
-        };
-
-      case 'switch':
-        return {
-          component: ElSwitch,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-        };
-
-      case 'checkbox':
-        return {
-          component: ElCheckboxGroup,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-          children: field.options?.map(option =>
-            h(ElCheckbox, {
-              key: option.value,
-              value: option.value,
-              disabled: option.disabled,
-            }, { default: () => option.label }),
-          ),
-        };
-
-      case 'radio':
-        return {
-          component: ElRadioGroup,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-          children: field.options?.map(option =>
-            h(ElRadio, {
-              key: option.value,
-              value: option.value,
-              disabled: option.disabled,
-            }, { default: () => option.label }),
-          ),
-        };
-
-      case 'rate':
-        return {
-          component: ElRate,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-        };
-
-      case 'color':
-        return {
-          component: ElColorPicker,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-        };
-
-      case 'slider':
-        return {
-          component: ElSlider,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-        };
-
-      case 'transfer':
-        return {
-          component: ElTransfer,
-          props: {
-            'modelValue': internalModel.value[field.key],
-            'onUpdate:modelValue': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            'data': field.options,
-            'props': { key: 'value', label: 'label', disabled: 'disabled' },
-            ...field.props,
-          },
-        };
-
-      case 'upload':
-        return {
-          component: ElUpload,
-          props: {
-            'fileList': internalModel.value[field.key],
-            'onUpdate:fileList': (val: any) => {
-              internalModel.value[field.key] = val;
-            },
-            'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            ...field.props,
-          },
-          children: h(ElButton, { type: 'primary' }, { default: () => field.placeholder || '点击上传' }),
-        };
-
-      case 'autocomplete':
-        return {
-          component: ElAutocomplete,
-          props: baseProps,
-        };
-
-      default:
-        return {
-          component: ElInput,
-          props: baseProps,
-        };
-    }
-  }
-
-  function renderFieldControl(field: ProFormField): VNode {
-    const config = resolveFieldComponent(field);
-    return h(config.component, config.props, config.children);
   }
 
   async function validate() {
@@ -411,6 +164,10 @@ export function useProForm({ props, emit }: ProFormHookProps) {
     needCollapse,
     displayFields,
     showCollapseButton,
+    currentCols,
+    canActionsInSameLine,
+    displayFieldsSpan,
+    optionsCache,
     handleFieldChange,
     toggleCollapse,
     handleSubmit,
@@ -418,7 +175,6 @@ export function useProForm({ props, emit }: ProFormHookProps) {
     getFieldRules,
     getSlotName,
     getColSpanStyle,
-    renderFieldControl,
     validate,
     clearValidate,
     resetFields,

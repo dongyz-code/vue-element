@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { ProFormField } from '@/components/ui/pro-form/types';
+import type { ProFormField, ProFormOption } from '@/components/ui/pro-form/types';
 import { ElMessage } from 'element-plus';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { ProForm } from '@/components/ui/pro-form';
 
 const formModel = ref<Record<string, any>>({
@@ -374,6 +374,107 @@ function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void)
     : cities;
   cb(results.map(city => ({ value: city.label })));
 }
+
+const dynamicFormModel = ref<Record<string, any>>({
+  status: 1,
+  category: '',
+  filtered: '',
+  dynamic: '',
+});
+
+const categoryOptions = ref([
+  { label: '分类A', value: 'a' },
+  { label: '分类B', value: 'b' },
+  { label: '分类C', value: 'c' },
+]);
+
+const filteredOptions = computed(() => {
+  return [
+    { label: '选项1', value: 1 },
+    { label: '选项2', value: 2 },
+    { label: '选项3', value: 3 },
+  ].filter(_o => dynamicFormModel.value.status !== 0);
+});
+
+function dynamicOptionsFunc() {
+  return [
+    { label: '动态A', value: 'da' },
+    { label: '动态B', value: 'db' },
+    { label: '动态C', value: 'dc' },
+  ];
+}
+
+const dynamicOptionsFormFields: ProFormField[] = [
+  {
+    key: 'status',
+    label: '状态',
+    type: 'select',
+    options: [
+      { label: '启用', value: 1 },
+      { label: '禁用', value: 0 },
+    ],
+    colSpan: 1,
+    defaultValue: 1,
+  },
+  {
+    key: 'category',
+    label: '分类 (ref)',
+    type: 'select',
+    options: categoryOptions,
+    colSpan: 1,
+    defaultValue: '',
+  },
+  {
+    key: 'filtered',
+    label: '筛选项 (computed)',
+    type: 'select',
+    options: filteredOptions,
+    colSpan: 1,
+    defaultValue: '',
+  },
+  {
+    key: 'dynamic',
+    label: '动态选项 (函数)',
+    type: 'select',
+    options: dynamicOptionsFunc,
+    colSpan: 1,
+    defaultValue: '',
+  },
+];
+
+const topLabelFormModel = ref<Record<string, any>>({
+  name: '',
+  email: '',
+  city: '',
+  gender: '',
+});
+
+async function fetchAsyncOptions(): Promise<ProFormOption[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { label: '异步选项1', value: 'async1' },
+        { label: '异步选项2', value: 'async2' },
+        { label: '异步选项3', value: 'async3' },
+      ]);
+    }, 1000);
+  });
+}
+
+const asyncOptionsFormModel = ref<Record<string, any>>({
+  asyncSelect: '',
+});
+
+const asyncOptionsFields: ProFormField[] = [
+  {
+    key: 'asyncSelect',
+    label: '异步选项 (Promise)',
+    type: 'select',
+    options: fetchAsyncOptions,
+    colSpan: 1,
+    defaultValue: '',
+  },
+];
 </script>
 
 <template>
@@ -521,6 +622,121 @@ function fetchSuggestions(queryString: string, cb: (suggestions: any[]) => void)
           :show-collapse="false"
           submit-text="搜索"
         />
+      </div>
+
+      <!-- Label 在上方 -->
+      <div class="demo-section">
+        <h3>Label 在上方</h3>
+        <ProForm
+          v-model="topLabelFormModel"
+          label-position="top"
+          :options="[
+            {
+              key: 'name',
+              label: '姓名',
+              type: 'input',
+              placeholder: '请输入姓名',
+              colSpan: 1,
+              defaultValue: '',
+            },
+            {
+              key: 'email',
+              label: '邮箱',
+              type: 'input',
+              placeholder: '请输入邮箱',
+              colSpan: 1,
+              defaultValue: '',
+            },
+            {
+              key: 'city',
+              label: '城市',
+              type: 'select',
+              placeholder: '请选择城市',
+              colSpan: 1,
+              options: cities,
+              defaultValue: '',
+            },
+            {
+              key: 'gender',
+              label: '性别',
+              type: 'radio',
+              colSpan: 1,
+              options: [
+                { label: '男', value: 'male' },
+                { label: '女', value: 'female' },
+              ],
+              defaultValue: '',
+            },
+          ]"
+          :show-collapse="false"
+        />
+        <div class="mt-4">
+          <el-text tag="b">
+            当前表单值：
+          </el-text>
+          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(topLabelFormModel, null, 2) }}</pre>
+        </div>
+      </div>
+
+      <!-- 动态 options 示例 -->
+      <div class="demo-section">
+        <h3>动态 Options（支持数组、ref、computed、函数、异步函数）</h3>
+        <p class="mb-4 text-sm text-gray-600">
+          当状态为"禁用"时，"筛选项"会自动更新（演示 computed 响应式）
+        </p>
+        <ProForm
+          v-model="dynamicFormModel"
+          :options="dynamicOptionsFormFields"
+          :show-collapse="false"
+          submit-text="查询"
+        />
+        <div class="mt-4">
+          <el-text tag="b">
+            当前表单值：
+          </el-text>
+          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(dynamicFormModel, null, 2) }}</pre>
+        </div>
+      </div>
+
+      <!-- 异步 options 示例 -->
+      <div class="demo-section">
+        <h3>异步加载 Options</h3>
+        <p class="mb-4 text-sm text-gray-600">
+          支持通过返回 Promise 的函数异步加载选项数据（模拟 1 秒延迟）
+        </p>
+        <ProForm
+          v-model="asyncOptionsFormModel"
+          :options="asyncOptionsFields"
+          :show-collapse="false"
+          submit-text="提交"
+        />
+        <div class="mt-4">
+          <el-text tag="b">
+            当前表单值：
+          </el-text>
+          <pre class="mt-2 p-4 bg-gray-100 rounded">{{ JSON.stringify(asyncOptionsFormModel, null, 2) }}</pre>
+        </div>
+      </div>
+
+      <!-- 响应式布局说明 -->
+      <div class="demo-section">
+        <h3>智能响应式布局</h3>
+        <div class="mb-4 p-4 bg-blue-50 rounded">
+          <p class="text-sm text-gray-700 mb-2">
+            <strong>布局规则：</strong>
+          </p>
+          <ul class="text-sm text-gray-600 space-y-1 ml-4">
+            <li>• 屏幕宽度 &gt;= 1280px：显示 4 列</li>
+            <li>• 屏幕宽度 1024px-1279px：显示 3 列</li>
+            <li>• 屏幕宽度 768px-1023px：显示 2 列</li>
+            <li>• 屏幕宽度 &lt; 768px：显示 1 列</li>
+            <li>• 收起状态：只展示第一行表单项，按钮根据剩余空间智能换行</li>
+            <li>• 展开状态：显示所有表单项，按钮区独占一行并右对齐</li>
+          </ul>
+          <p class="text-sm text-gray-500 mt-2">
+            提示：调整浏览器窗口宽度可以看到布局实时响应变化
+          </p>
+        </div>
       </div>
     </el-card>
   </div>

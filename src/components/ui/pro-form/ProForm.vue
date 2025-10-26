@@ -2,6 +2,7 @@
 import type { ProFormEmits, ProFormExpose, ProFormProps } from './types';
 
 import { VIcon } from '..';
+import ProFormField from './ProFormField.vue';
 import { useProForm } from './useProForm';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
@@ -25,13 +26,14 @@ const {
   showCollapseButton,
   currentCols,
   canActionsInSameLine,
+  optionsCache,
   toggleCollapse,
   handleSubmit,
   handleReset,
+  handleFieldChange,
   getFieldRules,
   getSlotName,
   getColSpanStyle,
-  renderFieldControl,
   validate,
   clearValidate,
   resetFields,
@@ -80,7 +82,14 @@ defineExpose<ProFormExpose>({
             :form="formRef"
           />
 
-          <component :is="renderFieldControl(field)" v-else />
+          <ProFormField
+            v-else
+            :field="field"
+            :model-value="internalModel[field.key]"
+            :options-cache="optionsCache"
+            @update:model-value="internalModel[field.key] = $event"
+            @change="handleFieldChange(field.key, $event)"
+          />
         </el-form-item>
 
         <div

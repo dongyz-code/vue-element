@@ -1,6 +1,6 @@
 import type { FormInstance } from 'element-plus';
 import type { Component, EmitFn, VNode } from 'vue';
-import type { ProFormEmits, ProFormExpose, ProFormField, ProFormProps } from './types';
+import type { ProFormEmits, ProFormField, ProFormOptions, ProFormProps } from './types';
 
 import {
   ElAutocomplete,
@@ -24,7 +24,8 @@ import {
   ElTransfer,
   ElUpload,
 } from 'element-plus';
-import { computed, h, ref } from 'vue';
+import { computed, h, isRef, ref, unref } from 'vue';
+import { useResponsiveCols } from './useResponsiveCols';
 
 import 'element-plus/es/components/autocomplete/style/css';
 import 'element-plus/es/components/button/style/css';
@@ -61,6 +62,8 @@ export function useProForm({ props, emit }: ProFormHookProps) {
   const formRef = ref<FormInstance>();
   const collapsed = ref(props.defaultCollapsed);
 
+  const { currentCols } = useResponsiveCols();
+
   const internalModel = computed({
     get: () => props.modelValue,
     set: (value) => {
@@ -95,13 +98,13 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       return visibleFields.value;
     }
 
-    const maxSpan = (props.collapseToRows! - 1) * 4 + 3;
+    const maxColsInFirstRow = currentCols.value;
     let currentSpan = 0;
     const result: ProFormField[] = [];
 
     for (const field of visibleFields.value) {
-      const fieldSpan = field.colSpan || 1;
-      if (currentSpan + fieldSpan <= maxSpan) {
+      const fieldSpan = Math.min(field.colSpan || 1, maxColsInFirstRow);
+      if (currentSpan + fieldSpan <= maxColsInFirstRow) {
         result.push(field);
         currentSpan += fieldSpan;
       }
@@ -114,6 +117,22 @@ export function useProForm({ props, emit }: ProFormHookProps) {
   });
 
   const showCollapseButton = computed(() => needCollapse.value && props.showCollapse);
+
+  const displayFieldsSpan = computed(() => {
+    return displayFields.value.reduce((sum, field) => {
+      return sum + Math.min(field.colSpan || 1, currentCols.value);
+    }, 0);
+  });
+
+  const canActionsInSameLine = computed(() => {
+    if (!collapsed.value)
+      return false;
+
+    const actionsSpan = 1;
+    const usedInLastRow = displayFieldsSpan.value % currentCols.value || currentCols.value;
+
+    return usedInLastRow + actionsSpan <= currentCols.value;
+  });
 
   function handleFieldChange(key: string, value: any) {
     emit('change', key, value, internalModel.value);
@@ -163,9 +182,25 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       return {};
     }
 
+    const actualSpan = Math.min(colSpan, currentCols.value);
     return {
-      gridColumn: `span ${Math.min(colSpan, 4)} / span ${Math.min(colSpan, 4)}`,
+      gridColumn: `span ${actualSpan} / span ${actualSpan}`,
     };
+  }
+
+  function normalizeOptions(options?: ProFormOptions) {
+    if (!options)
+      return [];
+
+    if (typeof options === 'function') {
+      const result = options();
+      return Array.isArray(result) ? result : [];
+    }
+
+    if (isRef(options))
+      return unref(options) || [];
+
+    return options;
   }
 
   /**
@@ -201,11 +236,12 @@ export function useProForm({ props, emit }: ProFormHookProps) {
           props: baseProps,
         };
 
-      case 'select':
+      case 'select': {
+        const normalizedOptions = normalizeOptions(field.options);
         return {
           component: ElSelect,
           props: baseProps,
-          children: field.options?.map(option =>
+          children: normalizedOptions.map(option =>
             h(ElOption, {
               key: option.value,
               label: option.label,
@@ -214,15 +250,18 @@ export function useProForm({ props, emit }: ProFormHookProps) {
             }),
           ),
         };
+      }
 
-      case 'cascader':
+      case 'cascader': {
+        const normalizedOptions = normalizeOptions(field.options);
         return {
           component: ElCascader,
           props: {
             ...baseProps,
-            options: field.options,
+            options: normalizedOptions,
           },
         };
+      }
 
       case 'date':
         return {
@@ -264,7 +303,8 @@ export function useProForm({ props, emit }: ProFormHookProps) {
           },
         };
 
-      case 'checkbox':
+      case 'checkbox': {
+        const normalizedOptions = normalizeOptions(field.options);
         return {
           component: ElCheckboxGroup,
           props: {
@@ -275,7 +315,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
             'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
             ...field.props,
           },
-          children: field.options?.map(option =>
+          children: normalizedOptions.map(option =>
             h(ElCheckbox, {
               key: option.value,
               value: option.value,
@@ -283,8 +323,10 @@ export function useProForm({ props, emit }: ProFormHookProps) {
             }, { default: () => option.label }),
           ),
         };
+      }
 
-      case 'radio':
+      case 'radio': {
+        const normalizedOptions = normalizeOptions(field.options);
         return {
           component: ElRadioGroup,
           props: {
@@ -295,7 +337,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
             'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
             ...field.props,
           },
-          children: field.options?.map(option =>
+          children: normalizedOptions.map(option =>
             h(ElRadio, {
               key: option.value,
               value: option.value,
@@ -303,6 +345,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
             }, { default: () => option.label }),
           ),
         };
+      }
 
       case 'rate':
         return {
@@ -343,7 +386,8 @@ export function useProForm({ props, emit }: ProFormHookProps) {
           },
         };
 
-      case 'transfer':
+      case 'transfer': {
+        const normalizedOptions = normalizeOptions(field.options);
         return {
           component: ElTransfer,
           props: {
@@ -352,11 +396,12 @@ export function useProForm({ props, emit }: ProFormHookProps) {
               internalModel.value[field.key] = val;
             },
             'onChange': () => handleFieldChange(field.key, internalModel.value[field.key]),
-            'data': field.options,
+            'data': normalizedOptions,
             'props': { key: 'value', label: 'label', disabled: 'disabled' },
             ...field.props,
           },
         };
+      }
 
       case 'upload':
         return {
@@ -411,6 +456,9 @@ export function useProForm({ props, emit }: ProFormHookProps) {
     needCollapse,
     displayFields,
     showCollapseButton,
+    currentCols,
+    canActionsInSameLine,
+    displayFieldsSpan,
     handleFieldChange,
     toggleCollapse,
     handleSubmit,

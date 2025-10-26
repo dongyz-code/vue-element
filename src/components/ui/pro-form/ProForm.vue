@@ -6,6 +6,7 @@ import { useProForm } from './useProForm';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
   labelWidth: '100px',
+  labelPosition: 'left',
   collapseToRows: 1,
   defaultCollapsed: true,
   showCollapse: true,
@@ -20,9 +21,10 @@ const {
   formRef,
   collapsed,
   internalModel,
-  needCollapse,
   displayFields,
   showCollapseButton,
+  currentCols,
+  canActionsInSameLine,
   toggleCollapse,
   handleSubmit,
   handleReset,
@@ -47,10 +49,19 @@ defineExpose<ProFormExpose>({
     <el-form
       ref="formRef"
       :model="internalModel"
-      :label-width="labelWidth"
+      :label-width="labelPosition === 'top' ? undefined : labelWidth"
+      :label-position="labelPosition"
       v-bind="formProps"
     >
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div
+        class="grid gap-4"
+        :class="{
+          'grid-cols-1': currentCols === 1,
+          'grid-cols-2': currentCols === 2,
+          'grid-cols-3': currentCols === 3,
+          'grid-cols-4': currentCols === 4,
+        }"
+      >
         <el-form-item
           v-for="field in displayFields"
           :key="field.key"
@@ -73,7 +84,10 @@ defineExpose<ProFormExpose>({
         </el-form-item>
 
         <div
-          class="grid items-center gap-2 col-span-1 sm:col-span-2 lg:col-span-3 xl:col-span-4 justify-end"
+          :class="[
+            canActionsInSameLine ? 'justify-start' : 'col-span-full justify-end',
+          ]"
+          class="flex items-center gap-2"
         >
           <slot
             name="actions"

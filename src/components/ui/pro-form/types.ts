@@ -184,7 +184,7 @@ export interface ProFormProps {
   options: ProFormField[];
   rules?: FormRules;
   labelWidth?: string | number;
-  labelPosition?: 'left' | 'top';
+  labelPosition?: 'left' | 'top' | 'right';
   collapseToRows?: number;
   defaultCollapsed?: boolean;
   showCollapse?: boolean;

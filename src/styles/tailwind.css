@@ -9,6 +9,8 @@
   --color-info: var(--el-color-info);
 }
 
+@source inline('{sm:,md:,lg:,xl:,}grid-cols-{{1..12..1}}');
+
 @utility scroll-bar {
   &::-webkit-scrollbar {
     width: 0.5rem;

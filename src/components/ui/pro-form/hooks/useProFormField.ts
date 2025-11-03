@@ -1,17 +1,14 @@
-import type { Component, FunctionalComponent, VNode } from 'vue';
-import type { ProFormField, ProFormFieldProps, ProFormOption } from '../types';
+import type { Component, FunctionalComponent } from 'vue';
+import type { ProFormFieldProps, ProFormOption } from '../types';
 
 import {
   ElAutocomplete,
-  ElButton,
   ElCascader,
-  ElCheckbox,
   ElCheckboxGroup,
   ElColorPicker,
   ElDatePicker,
   ElInput,
   ElInputNumber,
-  ElRadio,
   ElRadioGroup,
   ElRate,
   ElSelect,
@@ -22,7 +19,7 @@ import {
   ElTransfer,
   ElUpload,
 } from 'element-plus';
-import { computed, h, isRef, onMounted, ref, shallowRef, toRef } from 'vue';
+import { computed, isRef, onMounted, ref, shallowRef, toRef } from 'vue';
 
 import 'element-plus/es/components/autocomplete/style/css';
 import 'element-plus/es/components/button/style/css';

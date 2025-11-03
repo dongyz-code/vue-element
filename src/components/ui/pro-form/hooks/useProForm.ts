@@ -54,7 +54,7 @@ export function useProForm({ props, emit }: ProFormHookProps) {
       return visibleFields.value;
     }
 
-    const maxColsInFirstRow = currentCols.value;
+    const maxColsInFirstRow = currentCols.value - 1;
     let currentSpan = 0;
     const result: ProFormField[] = [];
 

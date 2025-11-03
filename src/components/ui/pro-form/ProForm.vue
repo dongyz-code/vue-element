@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { ProFormEmits, ProFormExpose, ProFormProps } from './types';
 
+import { VIcon } from '..';
 import { useProForm } from './hooks/useProForm';
 import ProFormField from './ProFormField.vue';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
   labelWidth: '120px',
-  labelPosition: 'left',
+  labelPosition: 'right',
   collapseToRows: 1,
   defaultCollapsed: true,
   showCollapse: true,
@@ -56,9 +57,10 @@ defineExpose<ProFormExpose>({
     :label-width="labelPosition === 'top' ? undefined : labelWidth"
     :label-position="labelPosition"
     v-bind="formProps"
+    class="pro-form"
   >
     <div
-      class=" grid gap-4"
+      class="grid gap-4"
       :class="[`grid-cols-${currentCols}`]"
     >
       <el-form-item
@@ -87,8 +89,7 @@ defineExpose<ProFormExpose>({
       </el-form-item>
 
       <div
-        class="flex items-center gap-2"
-        :class="canActionsInSameLine ? 'justify-start' : 'col-span-full justify-end'"
+        class="flex gap-2 justify-end items-end el-form-item"
       >
         <slot
           name="actions"
@@ -107,9 +108,16 @@ defineExpose<ProFormExpose>({
             v-if="showCollapseButton"
             text
             type="primary"
+            style="padding-left: 0; padding-right: 0;"
             @click="toggleCollapse"
           >
-            {{ collapsed ? '展开' : '收起' }}
+            <span>{{ collapsed ? '展开' : '收起' }}</span>
+            <VIcon
+              icon="weui:arrow-filled" class="transition-transform duration-300" :class="{
+                'rotate-90': collapsed,
+                '-rotate-90': !collapsed,
+              }"
+            ></VIcon>
           </ElButton>
         </slot>
       </div>
@@ -119,10 +127,6 @@ defineExpose<ProFormExpose>({
 
 <style scoped lang="postcss">
 .pro-form {
-  :deep(.el-form-item) {
-    margin-bottom: 0;
-  }
-
   :deep(.el-input),
   :deep(.el-input-number),
   :deep(.el-select),

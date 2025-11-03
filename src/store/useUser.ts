@@ -1,5 +1,5 @@
-import { routerPush } from '@/router';
 import { defineStore } from 'pinia';
+import { routerPush } from '@/router';
 
 export type UserInfo = {
   user_id: string;
@@ -37,7 +37,7 @@ export const useUserStore = defineStore('user', {
     },
 
     async logout() {
-      this.token = ''
+      this.token = '';
       this.userInfo = null;
       const currentUrl = window.location.href;
 
@@ -45,13 +45,13 @@ export const useUserStore = defineStore('user', {
         name: 'login',
         query: {
           redirect: currentUrl,
-        }
-      })
-    }
+        },
+      });
+    },
   },
 
   persist: {
     key: 'user',
     pick: ['token'],
-  }
+  },
 });

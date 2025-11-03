@@ -11,6 +11,10 @@ export const routes: RouteItem[] = [
         path: 'home',
         name: 'home',
         component: () => import('@/pages/home/index.vue'),
+        meta: {
+          title: '首页',
+          noAuth: true,
+        },
       },
       {
         path: '403',

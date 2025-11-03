@@ -28,6 +28,7 @@ const computedOptions = computed(() => {
 });
 
 function funcOptions() {
+  console.log('funcOptions');
   return [
     { label: 'Func X', value: 'x' },
     { label: 'Func Y', value: 'y' },

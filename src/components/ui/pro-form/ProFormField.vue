@@ -1,12 +1,7 @@
 <script setup lang="ts">
-import type { ProFormField } from './types';
+import type { ProFormFieldProps } from './types';
 
 import { useProFormField } from './hooks/useProFormField';
-
-interface ProFormFieldProps {
-  field: ProFormField;
-  modelValue: any;
-}
 
 const props = defineProps<ProFormFieldProps>();
 
@@ -15,18 +10,12 @@ const emit = defineEmits<{
   'change': [value: any];
 }>();
 
-const { componentConfig, slots, handleUpdate, handleChange } = useProFormField({
-  props,
-  emit,
+const { Component, props: fieldProps } = useProFormField(props, {
+  onUpdateModelValue: (val: any) => emit('update:modelValue', val),
+  onChange: (val: any) => emit('change', val),
 });
 </script>
 
 <template>
-  <component
-    :is="componentConfig.component"
-    v-bind="componentConfig.props"
-    v-slots="slots"
-    @update:model-value="handleUpdate"
-    @change="handleChange"
-  />
+  <component :is="Component" v-bind="fieldProps" />
 </template>

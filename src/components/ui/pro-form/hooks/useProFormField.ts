@@ -1,52 +1,187 @@
-import type { ProFormField } from '../types';
-import { computed } from 'vue';
-import { resolveFieldComponent } from '../utils/fieldResolver';
+import type { Component, FunctionalComponent, VNode } from 'vue';
+import type { ProFormField, ProFormFieldProps, ProFormOption } from '../types';
 
-type ProFormFieldEmit = {
-  (event: 'update:modelValue', value: any): void;
-  (event: 'change', value: any): void;
-};
+import {
+  ElAutocomplete,
+  ElButton,
+  ElCascader,
+  ElCheckbox,
+  ElCheckboxGroup,
+  ElColorPicker,
+  ElDatePicker,
+  ElInput,
+  ElInputNumber,
+  ElRadio,
+  ElRadioGroup,
+  ElRate,
+  ElSelect,
+  ElSlider,
+  ElSwitch,
+  ElTimePicker,
+  ElTimeSelect,
+  ElTransfer,
+  ElUpload,
+} from 'element-plus';
+import { computed, h, isRef, onMounted, ref, shallowRef, toRef } from 'vue';
 
-interface UseProFormFieldProps {
-  props: {
-    field: ProFormField;
-    modelValue: any;
-  };
-  emit: ProFormFieldEmit;
+import 'element-plus/es/components/autocomplete/style/css';
+import 'element-plus/es/components/button/style/css';
+import 'element-plus/es/components/cascader/style/css';
+import 'element-plus/es/components/checkbox/style/css';
+import 'element-plus/es/components/checkbox-group/style/css';
+import 'element-plus/es/components/color-picker/style/css';
+import 'element-plus/es/components/date-picker/style/css';
+import 'element-plus/es/components/input/style/css';
+import 'element-plus/es/components/input-number/style/css';
+import 'element-plus/es/components/time-picker/style/css';
+import 'element-plus/es/components/time-select/style/css';
+import 'element-plus/es/components/transfer/style/css';
+import 'element-plus/es/components/upload/style/css';
+import 'element-plus/es/components/select/style/css';
+import 'element-plus/es/components/slider/style/css';
+import 'element-plus/es/components/switch/style/css';
+import 'element-plus/es/components/rate/style/css';
+import 'element-plus/es/components/radio/style/css';
+import 'element-plus/es/components/radio-group/style/css';
+
+interface FieldResolverCallbacks {
+  onUpdateModelValue: (value: any) => void;
+  onChange: (value: any) => void;
 }
 
-export function useProFormField({ props, emit }: UseProFormFieldProps) {
-  const componentConfig = computed(() => {
-    return resolveFieldComponent(props.field, props.modelValue, {
-      onUpdateModelValue: (val: any) => emit('update:modelValue', val),
-      onChange: (val: any) => emit('change', val),
-    });
-  });
+const componentMap = {
+  'input': ElInput,
+  'textarea': ElInput,
+  'input-number': ElInputNumber,
+  'select': ElSelect,
+  'cascader': ElCascader,
+  'date': ElDatePicker,
+  'daterange': ElDatePicker,
+  'time': ElTimePicker,
+  'timeselect': ElTimeSelect,
+  'switch': ElSwitch,
+  'checkbox': ElCheckboxGroup,
+  'radio': ElRadioGroup,
+  'rate': ElRate,
+  'color': ElColorPicker,
+  'slider': ElSlider,
+  'transfer': ElTransfer,
+  'upload': ElUpload,
+  'autocomplete': ElAutocomplete,
+  'text': 'div',
+};
 
-  const slots = computed(() => {
-    const config = componentConfig.value;
-    if (!config.children) {
-      return {};
-    }
+export function useProFormField(
+  props: ProFormFieldProps,
+  callbacks: FieldResolverCallbacks,
+) {
+  const { onUpdateModelValue, onChange } = callbacks;
 
-    const children = Array.isArray(config.children) ? config.children : [config.children];
+  const baseProps = computed(() => {
     return {
-      default: () => children,
+      'modelValue': props.modelValue,
+      'onUpdate:modelValue': onUpdateModelValue,
+      onChange,
+      'placeholder': props.field.placeholder,
+
     };
   });
 
-  function handleUpdate(value: any) {
-    emit('update:modelValue', value);
+  const field = toRef(props, 'field');
+
+  const lazyLoadPromise = shallowRef<Promise<ProFormOption[]> | null>(null);
+  const asyncOptions = shallowRef<ProFormOption[]>([]);
+  const isLoading = ref(false);
+
+  async function getAsyncOptions() {
+    if (lazyLoadPromise.value || !('options' in field.value)) {
+      return;
+    }
+
+    if (Array.isArray(field.value.options)) {
+      asyncOptions.value = field.value.options;
+      return;
+    }
+
+    if (isRef(field.value.options)) {
+      asyncOptions.value = field.value.options.value;
+      return;
+    }
+
+    if (typeof field.value.options === 'function') {
+      try {
+        const promise = field.value.options();
+        isLoading.value = true;
+
+        if (promise instanceof Promise) {
+          lazyLoadPromise.value = promise;
+          const options = await promise;
+          asyncOptions.value = options;
+          lazyLoadPromise.value = null;
+        }
+        else {
+          asyncOptions.value = promise;
+        }
+      }
+      catch (error) {
+        console.error(error);
+      }
+      finally {
+        isLoading.value = false;
+        lazyLoadPromise.value = null;
+      };
+    }
   }
 
-  function handleChange(value: any) {
-    emit('change', value);
-  }
+  onMounted(getAsyncOptions);
 
-  return {
-    componentConfig,
-    slots,
-    handleUpdate,
-    handleChange,
-  };
+  const FieldComponent = computed<Component | FunctionalComponent | string>(() => {
+    if (field.value.type === 'component') {
+      return field.value.component;
+    }
+
+    if (field.value.type === 'render') {
+      return field.value.render;
+    }
+
+    return componentMap[field.value.type] || 'div';
+  });
+
+  const fieldProps = computed(() => {
+    let common: any = { ...baseProps.value };
+
+    if ('props' in field.value) {
+      common = { ...common, ...field.value.props };
+    }
+
+    switch (field.value.type) {
+      case 'textarea':
+        common = { ...common, type: 'textarea' };
+        break;
+      case 'daterange':
+        common = { ...common, type: 'daterange' };
+        break;
+      case 'select':
+      case 'cascader':
+      case 'transfer':
+      case 'checkbox':
+      case 'radio':
+        common = { ...common, options: asyncOptions.value };
+        break;
+      case 'upload':
+        common = {
+          ...common,
+          'fileList': props.modelValue,
+          'onUpdate:fileList': onUpdateModelValue,
+          onChange,
+        };
+        break;
+      default:
+        break;
+    }
+
+    return common;
+  });
+
+  return { Component: FieldComponent, props: fieldProps };
 }

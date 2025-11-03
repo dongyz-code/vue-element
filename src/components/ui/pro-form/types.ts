@@ -1,9 +1,9 @@
 import type {
   AutocompleteProps,
-  CascaderProps,
   CheckboxGroupProps,
   ColorPickerProps,
   DatePickerProps,
+  ElCascader,
   FormItemRule,
   FormRules,
   InputNumberProps,
@@ -18,7 +18,7 @@ import type {
   TransferProps,
   UploadProps,
 } from 'element-plus';
-import type { ComputedRef, Ref } from 'vue';
+import type { Component, ComputedRef, Ref, VNode } from 'vue';
 
 export interface ProFormOption {
   label: string;
@@ -71,7 +71,7 @@ export type SelectField = ProFormFieldBase & {
 export type CascaderField = ProFormFieldBase & {
   type: 'cascader';
   options: ProFormOptions;
-  props?: Partial<CascaderProps>;
+  props?: InstanceType<typeof ElCascader>['props'];
 };
 
 export type DateField = ProFormFieldBase & {
@@ -142,6 +142,20 @@ export type AutocompleteField = ProFormFieldBase & {
   props?: Partial<AutocompleteProps>;
 };
 
+export type ComponentField = ProFormFieldBase & {
+  type: 'component';
+  component: Component;
+};
+
+export type RenderField = ProFormFieldBase & {
+  type: 'render';
+  render: (props: any) => VNode;
+};
+
+export type StaticField = ProFormFieldBase & {
+  type: 'text';
+};
+
 export type ProFormField
   = | InputField
     | TextareaField
@@ -160,7 +174,10 @@ export type ProFormField
     | SliderField
     | TransferField
     | UploadField
-    | AutocompleteField;
+    | AutocompleteField
+    | StaticField
+    | ComponentField
+    | RenderField;
 
 export interface ProFormProps {
   modelValue: Record<string, any>;
@@ -188,4 +205,9 @@ export interface ProFormExpose {
   validate: () => Promise<void>;
   clearValidate: () => void;
   resetFields: () => void;
+}
+
+export interface ProFormFieldProps {
+  field: ProFormField;
+  modelValue: any;
 }

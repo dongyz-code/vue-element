@@ -5,7 +5,7 @@ import { useProForm } from './hooks/useProForm';
 import ProFormField from './ProFormField.vue';
 
 const props = withDefaults(defineProps<ProFormProps>(), {
-  labelWidth: '100px',
+  labelWidth: '120px',
   labelPosition: 'left',
   collapseToRows: 1,
   defaultCollapsed: true,
@@ -117,7 +117,7 @@ defineExpose<ProFormExpose>({
   </el-form>
 </template>
 
-<style scoped lang="scss">
+<style scoped lang="postcss">
 .pro-form {
   :deep(.el-form-item) {
     margin-bottom: 0;
